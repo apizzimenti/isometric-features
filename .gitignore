@@ -1,0 +1,14 @@
+bower_components
+node_modules
+
+.tmp/
+
+.idea/*
+docs/
+
+test/
+
+.bowerrc
+*.DS_Store
+
+.yo-rc.json

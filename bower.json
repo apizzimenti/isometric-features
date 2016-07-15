@@ -1,0 +1,14 @@
+{
+  "name": "iso-game-features",
+  "version": "0.0.0",
+  "dependencies": {
+    "phaser": "2.4.4",
+    "phaser-isometric": "*",
+    "angular": "^1.5.7",
+    "easystarjs": "easystar.js#^0.3.0"
+  },
+  "devDependencies": {},
+  "appPath": "app",
+  "moduleName": "isoGameFeaturesApp",
+  "main": "dist/isometric-features.min.js"
+}
