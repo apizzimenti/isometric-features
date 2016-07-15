@@ -1,6 +1,14 @@
 {
-  "name": "iso-game-features",
-  "version": "0.0.0",
+  "name": "isometric-features",
+  "description": "Supplemental features for the phaser isometric plugin.",
+  "author": "Anthony Pizzimenti <pizzimentianthony@gmail.com>",
+  "license": "MIT",
+
+  "ignore": [
+    "node_modules",
+    "bower_components",
+    "test"
+  ],
   "dependencies": {
     "phaser": "2.4.4",
     "phaser-isometric": "*",
@@ -9,6 +17,5 @@
   },
   "devDependencies": {},
   "appPath": "app",
-  "moduleName": "isoGameFeaturesApp",
   "main": "dist/isometric-features.min.js"
 }
