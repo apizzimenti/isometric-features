@@ -1,0 +1,100 @@
+{"frames": {
+
+"Blogg":
+{
+	"frame": {"x":0,"y":0,"w":48,"h":48},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
+	"sourceSize": {"w":48,"h":48}
+},
+"Galoot":
+{
+	"frame": {"x":48,"y":0,"w":48,"h":55},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":55},
+	"sourceSize": {"w":48,"h":55}
+},
+"astronaut":
+{
+	"frame": {"x":96,"y":0,"w":48,"h":48},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
+	"sourceSize": {"w":48,"h":48}
+},
+"bottom":
+{
+	"frame": {"x":144,"y":0,"w":133,"h":83},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":133,"h":83},
+	"sourceSize": {"w":133,"h":83}
+},
+"grass":
+{
+	"frame": {"x":277,"y":0,"w":132,"h":99},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":132,"h":99},
+	"sourceSize": {"w":132,"h":99}
+},
+"kanga_ram":
+{
+	"frame": {"x":409,"y":0,"w":48,"h":48},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":48},
+	"sourceSize": {"w":48,"h":48}
+},
+"left":
+{
+	"frame": {"x":457,"y":0,"w":133,"h":99},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":133,"h":99},
+	"sourceSize": {"w":133,"h":99}
+},
+"right":
+{
+	"frame": {"x":590,"y":0,"w":133,"h":99},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":133,"h":99},
+	"sourceSize": {"w":133,"h":99}
+},
+"top":
+{
+	"frame": {"x":723,"y":0,"w":133,"h":99},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":133,"h":99},
+	"sourceSize": {"w":133,"h":99}
+},
+"tree":
+{
+	"frame": {"x":856,"y":0,"w":32,"h":45},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":45},
+	"sourceSize": {"w":32,"h":45}
+},
+"water":
+{
+	"frame": {"x":888,"y":0,"w":132,"h":83},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":132,"h":83},
+	"sourceSize": {"w":132,"h":83}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "tileset2.png",
+	"format": "RGBA8888",
+	"size": {"w":1020,"h":99},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:b4f9230cb43462e8c6ea20e2498d9499:654a5244ebbd6f9e15410c53e2cab1ac:5ea5655be60522422bd7ee486af1a55d$"
+}
+}

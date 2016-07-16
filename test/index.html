@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <!-- include: "type": "css", "files": ["<%= app.testStyles %>"] -->
+    <link href="../test/styles/main.css" rel="stylesheet" type="text/css">
+    <!-- /include -->
+</head>
+<body>
+
+    <!-- bower:js -->
+    <script src="../bower_components/phaser/build/phaser.js"></script>
+    <script src="../bower_components/phaser-isometric/dist/phaser-plugin-isometric.min.js"></script>
+    <script src="../bower_components/angular/angular.js"></script>
+    <script src="../bower_components/easystarjs/bin/easystar-0.3.0.min.js"></script>
+    <!-- endbower -->
+
+    <!-- include: "type": "js", "files": ["<%= app.scripts %>", "<%= app.testScripts %>"] -->
+    <script src="../lib/physics/bounds.js"></script>
+    <script src="../lib/physics/tileSystem.js"></script>
+    <script src="../lib/tools/debug.js"></script>
+    <script src="../lib/tools/globals.js"></script>
+    <script src="../lib/tools/system.js"></script>
+    <script src="../lib/world/animals.js"></script>
+    <script src="../lib/world/item.js"></script>
+    <script src="../lib/world/map.js"></script>
+    <script src="../lib/world/menu/contextMenu.js"></script>
+    <script src="../lib/world/menu/inventory.js"></script>
+    <script src="../lib/world/menu/messages.js"></script>
+    <script src="../lib/world/player.js"></script>
+    <script src="../test/scripts/angular.js"></script>
+    <script src="../test/scripts/items/candy.js"></script>
+    <script src="../test/scripts/items/dust.js"></script>
+    <script src="../test/scripts/items/lemon.js"></script>
+    <script src="../test/scripts/items/lint.js"></script>
+    <script src="../test/scripts/items/ninboy.js"></script>
+    <script src="../test/scripts/items/scanner.js"></script>
+    <script src="../test/scripts/loader.js"></script>
+    <script src="../test/scripts/root.js"></script>
+    <!-- /include -->
+
+    <div ng-app="game">
+        <game></game>
+    </div>
+
+</body>
+</html>
