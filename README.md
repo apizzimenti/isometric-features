@@ -44,3 +44,6 @@ from angular itself.
 
 Feel free to download this repo and run the test files, as they provide a robust example with a commented-out main 
 Phaser game and a loader class (highly recommended for large games).
+
+### documentation
+The documentation can be found [here](https://apizzimenti.github.io/isometric-features-docs/).
