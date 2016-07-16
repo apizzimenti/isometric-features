@@ -654,7 +654,7 @@ Mouse.prototype.reset = function () {
  * @property direction {number} Current direction of travel.
  * @property scanned {boolean} Has this Animal been scanned?
  * @property scan {object} Phaser Signal that, on dispatch, is immediately destroyed.
- * @property species {string} This animal's species.
+ * @property [species="none"] {string} This animal's species.
  *
  * @class {object} Animal
  * @this Animal
@@ -671,7 +671,7 @@ function Animal(game, scope, row, col, keys, group, map, species) {
     var _sprite$anchor;
 
     this.type = "animal";
-    this.species = species;
+    this.species = species || "none";
 
     this.game = game;
     this.scope = scope;
