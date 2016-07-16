@@ -45,7 +45,7 @@
  * @todo implement tooltip stuff.
  */
 
-function Inventory (game, map, width, height, mouse, escape, itemGroup) {
+function Inventory(game, map, width, height, mouse, escape, itemGroup) {
 
     this.game = game;
     this.width = width;
@@ -164,13 +164,14 @@ Inventory.prototype.addItem = function (item) {
  */
 
 Inventory.prototype.addItems = function (items) {
+    var _this2 = this;
 
     if (!Array.isArray(items)) {
         throw new Error("Use addItem for single items.");
     } else {
-        items.forEach((item) => {
-            this.addItem(item);
-        })
+        items.forEach(function (item) {
+            _this2.addItem(item);
+        });
     }
 };
 
@@ -185,9 +186,10 @@ Inventory.prototype.addItems = function (items) {
  */
 
 Inventory.prototype.onClick = function () {
+    var _this3 = this;
 
     var that = this;
-    this.game.input.onDown.add(() => {
+    this.game.input.onDown.add(function () {
         if (that.mouse.switch) {
             that.placeItem();
         } else {
@@ -195,10 +197,10 @@ Inventory.prototype.onClick = function () {
         }
     }, that);
 
-    this.escape.onDown.add(() => {
-        this.mouse.switch = false;
-        this.mouse.reset();
-        this.reset();
+    this.escape.onDown.add(function () {
+        _this3.mouse.switch = false;
+        _this3.mouse.reset();
+        _this3.reset();
     });
 };
 
@@ -248,7 +250,6 @@ Inventory.prototype.click = function () {
             this.currentItem = item;
         }
     }
-
 };
 
 /**
@@ -261,14 +262,14 @@ Inventory.prototype.click = function () {
 
 Inventory.prototype.reset = function () {
 
-    this.menuGroup.forEach((item) => {
+    this.menuGroup.forEach(function (item) {
         item.input.useHandCursor = true;
         item.tint = 0xFFFFFF;
 
         if (item.clicked) {
             item.clicked = false;
         }
-    })
+    });
 };
 
 /**
@@ -283,12 +284,12 @@ Inventory.prototype.reset = function () {
 Inventory.prototype.placeItem = function () {
 
     var tileSize = this.mouse.map.tileSize,
-        x = this.mouse.threeD.x - (this.mouse.threeD.x % tileSize),
-        y = this.mouse.threeD.y - (this.mouse.threeD.y % tileSize),
+        x = this.mouse.threeD.x - this.mouse.threeD.x % tileSize,
+        y = this.mouse.threeD.y - this.mouse.threeD.y % tileSize,
         item = this.currentItem,
         key = item.key,
         tile = this.mouse.tile,
-        message = `Sorry, you can't place the ${key} there. Choose a place that you've already seen!`,
+        message = "Sorry, you can't place the " + key + " there. Choose a place that you've already seen!",
         row,
         col;
 
@@ -307,174 +308,7 @@ Inventory.prototype.placeItem = function () {
         this.items[row][col] = null;
         this.mouse.reset();
         this.mouse.switch = false;
-
     } else {
-        this.messages.add(message)
+        this.messages.add(message);
     }
-};
-
-
-/**
- * @author Anthony Pizzimenti
- *
- * @desc The Message structure handles all the popup messages in the game.
- *
- * @param game {object} Current Phaser game instance.
- * @param y {number} Height of the game.
- * @param size {number} Font size.
- *
- * @property game {object} Phaser game instance.
- * @property y {number} Height of the game.
- * @property message {string | string[]} Message to be displayed.
- * @property fontSize {number} Font size.
- * @property style {object} Message styling.
- * @property style.font {string} Font style.
- * @property style.fill {string} Hexadecimal color value.
- * @property alert {Signal} Signal.
- *
- * @class {object} Message
- * @this Message
- * @constructor
- */
-
-function Message (game, y, size) {
-    this.game = game;
-    this.y = y;
-    this.message = "";
-    this.fontSize = size;
-    this.style = {
-        font: size + "px Courier",
-        fill: "#FFFFFF"
-    };
-
-    this.alert = new Phaser.Signal();
-
-    this.alert.add(() => {this.display()});
-}
-
-/**
- * @author Anthony Pizzimenti
- *
- * @desc Adds the provided message to the queue.
- *
- * @param message {string} Message to be added to the queue.
- *
- * @this Message
- */
-
-Message.prototype.add = function (message) {
-    this.message = message;
-    this.alert.dispatch();
-};
-
-/**
- * @author Anthony Pizzimenti
- *
- * @desc Displays the message on the screen for five seconds, with in and out tweens.
- *
- * @this Message
- */
-
-Message.prototype.display = function () {
-
-    var str = this.format(this.message);
-
-    this.text = this.game.add.text(str.width, str.height, str.message, this.style);
-
-    this.text.alpha = 0;
-    this.text.fixedToCamera = true;
-
-    this.game.add.tween(this.text).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
-
-    this.game.time.events.add(Phaser.Timer.SECOND * 5, () => {
-        this.game.add.tween(this.text).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
-    })
-};
-
-/**
- * @author Anthony Pizzimenti
- *
- * @desc Formats messages so they are 60 characters wide.
- *
- * @param message {string} Message to be formatted.
- *
- * @returns {{width: number, height: number, message: string}} Width and height of Phaser message area; formatted string.
- *
- * @todo Format according to where words are, not just the 60th character.
- */
-
-Message.prototype.format = function (message) {
-    var last = 0,
-        strs = [],
-        dist = message.length % 60 ? message.length - (message.length % 60) : 0;
-
-    for (var i = 0; i < message.length; i++) {
-
-        if (!(i % 60) && i !== 0) {
-            strs.push(message.slice(last, i) + "\n");
-            last = i;
-        } else if (dist === 0 && i === message.length - 1) {
-            strs.push(message.slice(last, message.length));
-        } else if (i > dist && dist !== 0) {
-            strs.push(message.slice(last, message.length));
-            break;
-        }
-    }
-
-    return {
-        width: 10,
-        height: this.y - (strs.length * (this.fontSize * 1.8)),
-        message: strs.join(" ")
-    }
-};
-
-
-/**
- * @author Anthony Pizzimenti
- *
- * @desc Controls context menus and options.
- *
- * @param Inventory {Inventory} Inventory object.
- *
- * @property Inventory {Inventory} Inventory object.
- * @property game {object} Current game instance.
- * @property mouse {Mouse} Mouse object.
- * @property items {sprite[]} List of items currently in the Inventory.
- *
- * @class {object} contextMenu
- * @this contextMenu
- * @constructor
- */
-
-function contextMenu (Inventory) {
-
-    this.Inventory = Inventory;
-    this.game = this.Inventory.game;
-    this.mouse = this.Inventory.mouse;
-    this.items = this.Inventory.items;
-}
-
-/**
- * @author Anthony Pizzimenti
- *
- * @desc Creates a context menu at the current x, y position.
- *
- * @this contextMenu
- */
-
-contextMenu.prototype.createContextMenu = function () {
-    var x = this.mouse.twoD.x,
-        y = this.mouse.twoD.y,
-        graphics = this.game.add.graphics(0, 0);
-
-    graphics.fixedToCamera = true;
-    graphics.lineStyle(2, 0xFFFF00, 1);
-    graphics.beginFill(0xFFFF00, 0.4);
-    this.graphics = graphics;
-
-    this.menu = this.graphics.drawRect(x, y, 100, 150);
-
-    this.mouse.mouse.onDown.add(() => {
-        this.menu.destroy();
-    })
 };

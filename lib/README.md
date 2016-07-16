@@ -1,11 +1,11 @@
-### PlanetZ
------
+## PlanetZ
+
 This project is part of the Innovations in Teaching with Technology Award to Sheila Barron. This project is comprised of
 many games, but this documentation refers to the Phaser Isometric tagging game.
 
 
 ### Common Errors
------
+
 #### `tileset is attempting to enable a physics body with an unknown physics system.`
 This error arises when the Isometric Plugin is incompatible with the version of Phaser that's installed. As of June 22,
 2016, the highest compatible Phaser version is v2.4.4 Amador. To install it, run `bower install Phaser#2.4.4`. bower will
@@ -39,15 +39,26 @@ This occurs most often with bad function scoping. For example:
     }
 
 This is because JavaScript has lexical *and* function scoping, so `this` refers only to the current scope; the function
-`set` has no `say()` property, so it cannot be called.
+`set` has no `say()` method, so it cannot be called.
 
 #### `Uncaught TypeError: Cannot read property <num> of undefined.`
 This is an error with the physics system. If you find this bug, please report it immediately to one of the email addresses
 below. It may not happen every time, but it can happen sometimes.
 
+### Dependency Chain
+
+Many constructs in this game require others as dependencies. As such, before each is declared, it should have all of
+its dependencies declared prior.
+
+|  this | requires this |
+| :---: | :-----------: |
+| `Animal` `Player` `Inventory` `Mouse` | `Map` |
+| `contextMenu` `Item` | `Inventory` |
+| `Inventory` | `Mouse` |
+
 
 ### Contact
------
+
 You can email the authors of this game at:
 
 cale-bierman@uiowa.edu

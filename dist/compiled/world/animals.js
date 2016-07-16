@@ -137,7 +137,7 @@ Animal.prototype.timedMovement = function () {
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Listens for the scan event, and then fires an event out to Angular.
+ * @desc Listens for events.
  *
  * @this Animal
  */
@@ -154,7 +154,19 @@ Animal.prototype.listen = function () {
     });
 };
 
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Generates a walkable path from the Animal's current location to the target location.
+ *
+ * @param itemRow {number} Target item's row.
+ * @param itemCol {number} Target item's column.
+ *
+ * @this Animal
+ */
+
 Animal.prototype.pathfind = function (itemRow, itemCol) {
+    var _this3 = this;
 
     var e = new EasyStar.js(),
         row = this.sprite.row,
@@ -169,6 +181,7 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
         if (!path) {
             console.log("path not found");
         } else {
+            _this3.game.time.events.stop();
             console.dir(path);
         }
     });
