@@ -51,7 +51,7 @@ Many constructs in this game require others as dependencies. As such, before eac
 its dependencies declared prior.
 
 |  this | requires this |
-| :---: | :-----------: |
+| :---  | -----------: |
 | `Animal` `Player` `Inventory` `Mouse` | `Map` |
 | `contextMenu` `Item` | `Inventory` |
 | `Inventory` | `Mouse` |
