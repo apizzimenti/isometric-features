@@ -17,5 +17,5 @@
   },
   "devDependencies": {},
   "appPath": "app",
-  "main": "dist/isometric-features.min.js"
+  "main": "dist/isometric-features.js"
 }
