@@ -5,10 +5,6 @@ module.exports = function (grunt) {
         
         app: {
             scripts: [
-                "lib/world/items/item.js",
-                "lib/**/*.js"
-            ],
-            testScripts: [
                 "test/scripts/**/*.js"
             ],
             testStyles: [
@@ -84,7 +80,7 @@ module.exports = function (grunt) {
         
         includeSource: {
             options: {
-                basepath: "lib/",
+                basepath: "dist/",
                 baseUrl: "",
                 ordering: "",
                 rename: function (dest, match, options) {
