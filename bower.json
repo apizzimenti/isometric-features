@@ -3,7 +3,6 @@
   "description": "Supplemental features for the phaser isometric plugin.",
   "author": "Anthony Pizzimenti <pizzimentianthony@gmail.com>",
   "license": "MIT",
-
   "ignore": [
     "node_modules",
     "bower_components",
@@ -13,7 +12,8 @@
     "phaser": "2.4.4",
     "phaser-isometric": "*",
     "angular": "^1.5.7",
-    "easystarjs": "easystar.js#^0.3.0"
+    "easystarjs": "easystar.js#^0.3.0",
+    "jquery": "^3.1.0"
   },
   "devDependencies": {},
   "appPath": "app",
