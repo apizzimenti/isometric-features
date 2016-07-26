@@ -83,15 +83,15 @@ Debug.prototype.sprite = function (sprites) {
 
             try {
                 _this.game.debug.body(sprite.sprite.tile.top, "#FF0000", false);
+                _this.game.debug.body(sprite.sprite, "#FFFFFF", false);
+
+                for (var tile in sprite.sprite.tile) {
+                    if (sprite.tile.hasOwnProperty(tile) && tile !== "top") {
+                        _this.game.debug.body(sprite.tile[tile], "#FFDD00", false);
+                    }
+                }
             } catch (e) {
                 console.log("%cSprite has not loaded yet", "color: red");
-            }
-            _this.game.debug.body(sprite.sprite, "#FFFFFF", false);
-
-            for (var tile in sprite.tile) {
-                if (sprite.tile.hasOwnProperty(tile) && tile !== "top") {
-                    _this.game.debug.body(sprite.tile[tile], "#FFDD00", false);
-                }
             }
         };
 
