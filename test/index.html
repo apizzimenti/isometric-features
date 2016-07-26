@@ -15,6 +15,7 @@
     <script src="../bower_components/phaser-isometric/dist/phaser-plugin-isometric.min.js"></script>
     <script src="../bower_components/angular/angular.js"></script>
     <script src="../bower_components/easystarjs/bin/easystar-0.3.0.min.js"></script>
+    <script src="../bower_components/jquery/dist/jquery.js"></script>
     <!-- endbower -->
 
     <!-- include: "type": "js", "files": ["<%= app.scripts %>", "<%= app.testScripts %>"] -->
@@ -22,11 +23,13 @@
     <script src="../lib/physics/tileSystem.js"></script>
     <script src="../lib/tools/debug.js"></script>
     <script src="../lib/tools/globals.js"></script>
+    <script src="../lib/tools/mouse.js"></script>
     <script src="../lib/tools/system.js"></script>
     <script src="../lib/world/animals.js"></script>
     <script src="../lib/world/item.js"></script>
     <script src="../lib/world/map.js"></script>
-    <script src="../lib/world/menu/contextMenu.js"></script>
+    <script src="../lib/world/menu/ContextMenu.js"></script>
+    <script src="../lib/world/menu/guide.js"></script>
     <script src="../lib/world/menu/inventory.js"></script>
     <script src="../lib/world/menu/messages.js"></script>
     <script src="../lib/world/player.js"></script>
@@ -43,6 +46,11 @@
 
     <div ng-app="game">
         <game></game>
+    </div>
+
+    <div id="guide">
+        <p>yeeee</p>
+        here's the guide
     </div>
 
 </body>

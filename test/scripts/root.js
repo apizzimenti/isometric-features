@@ -72,7 +72,8 @@ var isogame = function (scope, injector) {
         create: function () {
             
             var keys,
-                space;
+                space,
+                guide;
             
             debug = new Debug(game, width);
 
@@ -105,6 +106,8 @@ var isogame = function (scope, injector) {
             // create the Inventory system and load items into it
             inventory = new Inventory(game, map, width, height, mouse, escape, characters);
             load.inventory(inventory, space);
+            
+            guide = new Guide("guide", "gameCanvas");
 
             /*
             this allows the game to be accessed from outside this file; when a new game is created in the angular
@@ -170,6 +173,7 @@ var isogame = function (scope, injector) {
 
             // debug usually goes here
             
+            debug.sprite(creatures);
         }
     };
 
