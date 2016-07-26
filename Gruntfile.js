@@ -5,6 +5,7 @@ module.exports = function (grunt) {
         
         app: {
             scripts: [
+                "dist/isometric-features.js",
                 "test/scripts/**/*.js"
             ],
             testStyles: [

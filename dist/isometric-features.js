@@ -1482,14 +1482,13 @@ Inventory.prototype.addItems = function (items) {
 Inventory.prototype.onClick = function () {
     var _this3 = this;
 
-    var that = this;
     this.game.input.onDown.add(function () {
-        if (that.mouse.switch) {
-            that.placeItem();
+        if (_this3.mouse.switch) {
+            _this3.placeItem();
         } else {
-            that.click();
+            _this3.click();
         }
-    }, that);
+    });
 
     this.escape.onDown.add(function () {
         _this3.mouse.switch = false;
