@@ -113,6 +113,7 @@ Animal.prototype.isVisible = function (Player) {
  * random floating point value such that 0 < <code>n</code> < 3 and is changed at every event firing.
  *
  * @property rand {number} Current random time interval.
+ * @property loopedMovement {object} Phaser looped event.
  *
  * @this Animal
  *
@@ -126,7 +127,7 @@ Animal.prototype.timedMovement = function () {
 
     this.rand = Math.random() * 3;
 
-    this.game.time.events.loop(Phaser.Timer.SECOND * 3 + this.rand, function () {
+    this.loopedMovement = this.game.time.events.loop(Phaser.Timer.SECOND * 3 + this.rand, function () {
         dir = Math.floor(Math.random() * 4);
         _this.rand = Math.random() * 3;
 
@@ -170,7 +171,8 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
 
     var e = new EasyStar.js(),
         row = this.sprite.row,
-        col = this.sprite.col;
+        col = this.sprite.col,
+        dirs = [];
 
     e.setGrid(this.map.blocked);
     e.setAcceptableTiles([1]);
@@ -181,12 +183,68 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
         if (!path) {
             console.log("path not found");
         } else {
-            _this3.game.time.events.stop();
-            console.dir(path);
+            _this3.game.time.events.remove(_this3.loopedMovement);
+            dirs = determineDirections(path);
+            _this3.followDirection(true, path, dirs);
         }
     });
 
     e.calculate();
+};
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Recursive method for following a set of path instructions from EasyStar.js.
+ *
+ * @param begin {boolean} Is this the first iteration?
+ * @param path {object[]} Array of coordinate objects.
+ * @param dirs {number[]} Array of directions.
+ *
+ * @property sprite.tween {object} Phaser tween object that will be chained to.
+ *
+ * @this Animal
+ */
+
+Animal.prototype.followDirection = function (begin, path, dirs) {
+    var _this4 = this;
+
+    var dim = this.map.tileSize,
+        r = path[0].x,
+        c = path[0].y,
+        x = r * dim,
+        y = c * dim,
+        tween,
+        end = dirs.length === 0 || path.length === 1;
+
+    if (begin) {
+        var _game$add$tween;
+
+        this.sprite.tween = (_game$add$tween = this.game.add.tween(this.sprite)).to.apply(_game$add$tween, [{ isoX: x, isoY: y }].concat(_toConsumableArray(globals.tween)));
+
+        this.sprite.tween.onComplete.add(function () {
+            _this4.sprite.direction = dirs[0];
+            path.splice(0, 1);
+            dirs.splice(0, 1);
+
+            _this4.followDirection(false, path, dirs);
+        });
+    } else if (!begin && !end) {
+        var _tween;
+
+        tween = this.game.add.tween(this.sprite);
+        this.sprite.tween.chain((_tween = tween).to.apply(_tween, [{ isoX: x, isoY: y }].concat(_toConsumableArray(globals.tween))));
+
+        tween.onComplete.add(function () {
+            _this4.sprite.direction = dirs[0];
+            path.splice(0, 1);
+            dirs.splice(0, 1);
+
+            _this4.followDirection(false, path, dirs);
+        });
+    } else if (!begin && end) {
+        this.timedMovement();
+    }
 };
 
 /**

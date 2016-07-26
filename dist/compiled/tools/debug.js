@@ -79,9 +79,14 @@ Debug.prototype.sprite = function (sprites) {
 
     if (this.on) {
         var debugSprite = function debugSprite(sprite) {
-            _this.game.debug.text(sprite.row + ", " + sprite.col, _this.x, _this.y, _this.color);
-            _this.game.debug.body(sprite.tile.top, "#FF0000", false);
-            _this.game.debug.body(sprite, "#FFFFFF", false);
+            _this.game.debug.text(sprite.sprite.row + ", " + sprite.sprite.col, _this.x, _this.y, _this.color);
+
+            try {
+                _this.game.debug.body(sprite.sprite.tile.top, "#FF0000", false);
+            } catch (e) {
+                console.log("%cSprite has not loaded yet", "color: red");
+            }
+            _this.game.debug.body(sprite.sprite, "#FFFFFF", false);
 
             for (var tile in sprite.tile) {
                 if (sprite.tile.hasOwnProperty(tile) && tile !== "top") {
@@ -100,7 +105,7 @@ Debug.prototype.sprite = function (sprites) {
                 for (var _iterator = sprites[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var sprite = _step.value;
 
-                    debugSprite(sprite.sprite);
+                    debugSprite(sprite);
                 }
             } catch (err) {
                 _didIteratorError = true;
@@ -117,7 +122,7 @@ Debug.prototype.sprite = function (sprites) {
                 }
             }
         } else {
-            debugSprite(sprites.sprite);
+            debugSprite(sprites);
         }
     }
 };

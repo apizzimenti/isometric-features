@@ -90,7 +90,7 @@ function Inventory(game, map, width, height, mouse, escape, itemGroup) {
     window.graphics = graphics;
 
     this.messages = new Message(this.game, this.height, 14);
-    this.contextMenu = new contextMenu(this);
+    this.contextMenu = new ContextMenu(this);
 
     this.onClick();
 }
@@ -120,10 +120,6 @@ Inventory.prototype.addItem = function (item) {
 
     item.inventorySprite.inputEnabled = true;
     item.inventorySprite.input.useHandCursor = true;
-
-    if (item.key.includes("bunny")) {
-        name = "bunny";
-    }
 
     item.text = this.game.add.text(x, y, name, {
         font: "Courier",

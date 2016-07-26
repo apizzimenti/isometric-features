@@ -1,4 +1,4 @@
-/*! iso-game-features - v0.0.1 - 2016-07-15
+/*! iso-game-features - v0.0.1 - 2016-07-26
 * Copyright (c) 2016 ; Licensed MIT */
 "use strict";
 
@@ -208,6 +208,48 @@ function manipulateDirection(sprite, d) {
     }
 }
 
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Determines the directional values for a sprite based on a set of path instructions.
+ *
+ * @param path {object[]} Array of coordinate objects.
+ *
+ * @returns {number[]} The directions, in succession, that the sprite will be facing on this path.
+ */
+
+function determineDirections(path) {
+
+    var x,
+        y,
+        x_1,
+        y_1,
+        last = [];
+
+    for (var i = 0; i < path.length; i++) {
+
+        if (i + 1 < path.length) {
+
+            x = path[i].x;
+            y = path[i].y;
+            x_1 = path[i + 1].x;
+            y_1 = path[i + 1].y;
+
+            if (x > x_1) {
+                last.push(2);
+            } else if (x < x_1) {
+                last.push(0);
+            } else if (y > y_1) {
+                last.push(1);
+            } else if (y < y_1) {
+                last.push(3);
+            }
+        } else {
+            return last;
+        }
+    }
+}
+
 "use strict";
 
 /**
@@ -285,9 +327,14 @@ Debug.prototype.sprite = function (sprites) {
 
     if (this.on) {
         var debugSprite = function debugSprite(sprite) {
-            _this.game.debug.text(sprite.row + ", " + sprite.col, _this.x, _this.y, _this.color);
-            _this.game.debug.body(sprite.tile.top, "#FF0000", false);
-            _this.game.debug.body(sprite, "#FFFFFF", false);
+            _this.game.debug.text(sprite.sprite.row + ", " + sprite.sprite.col, _this.x, _this.y, _this.color);
+
+            try {
+                _this.game.debug.body(sprite.sprite.tile.top, "#FF0000", false);
+            } catch (e) {
+                console.log("%cSprite has not loaded yet", "color: red");
+            }
+            _this.game.debug.body(sprite.sprite, "#FFFFFF", false);
 
             for (var tile in sprite.tile) {
                 if (sprite.tile.hasOwnProperty(tile) && tile !== "top") {
@@ -306,7 +353,7 @@ Debug.prototype.sprite = function (sprites) {
                 for (var _iterator = sprites[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var sprite = _step.value;
 
-                    debugSprite(sprite.sprite);
+                    debugSprite(sprite);
                 }
             } catch (err) {
                 _didIteratorError = true;
@@ -323,7 +370,7 @@ Debug.prototype.sprite = function (sprites) {
                 }
             }
         } else {
-            debugSprite(sprites.sprite);
+            debugSprite(sprites);
         }
     }
 };
@@ -379,12 +426,13 @@ Debug.prototype.switch = function () {
  *
  * @desc A set of variables that have to be used in disparate locations.
  * 
- * @type {{anchor: number[], mapTileKey: string[]}}
+ * @type {{anchor: number[], mapTileKey: string[], tween: object[]}}
  */
 
 var globals = {
     anchor: [0.5, 0],
-    mapTileKey: ["grass", "sand", "sandstone"]
+    mapTileKey: ["grass", "sand", "sandstone"],
+    tween: [1000, Phaser.Easing.Linear.None, true, 0, 0, false]
 };
 
 /**
@@ -414,76 +462,12 @@ function dim(tileSize, mapSize, num) {
 
 (function () {})();
 /**
- * Created by apizzimenti on 5/19/16.
+ * Created by apizzimenti on 7/15/16.
  */
 
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Binds the left, right, up, and down keys to the running game instance.
- *
- * @param game {object} Phaser game instance.
- * @param context {object} the context game is bound to.
- */
-
-function keymap(game, context) {
-
-    context.cursors = game.input.keyboard.createCursorKeys();
-
-    context.game.input.keyboard.addKeyCapture([Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.UP, Phaser.Keyboard.DOWN]);
-
-    return {
-        esc: game.input.keyboard.addKey(Phaser.Keyboard.ESC),
-        space: game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
-    };
-};
-
-/**
- * @author Anthony Pizzimenti
- *
- * @desc Changes the direction of the given sprite based on keypresses.
- *
- * @param Player {Player} Phaser Player sprite.
- * @param context {object} the context game is bound to.
- */
-
-function keymapTrack(Player, context) {
-
-    /**
-     * Default speed in px/s for specified sprite.
-     * @type {number}
-     */
-
-    var speed = 50,
-        sprite = Player.sprite;
-
-    sprite.body.velocity.z = 0;
-    // sprite.isoZ = -3 + (3 * Math.sin(sprite.isoX + sprite.isoY));
-
-    if (context.cursors.up.isDown) {
-        sprite.body.velocity.y = -speed;
-        sprite.direction = 1;
-    } else if (context.cursors.down.isDown) {
-        sprite.body.velocity.y = speed;
-        sprite.direction = 3;
-    } else {
-        sprite.body.velocity.y = 0;
-    }
-
-    if (context.cursors.left.isDown) {
-        sprite.body.velocity.x = -speed;
-        sprite.direction = 2;
-    } else if (context.cursors.right.isDown) {
-        sprite.body.velocity.x = speed;
-        sprite.direction = 0;
-    } else {
-        sprite.body.velocity.x = 0;
-    }
-}
-
-/**
- * @author Anthony Pizzimenti
- * 
  * @desc Game's mouse object.
  *
  * @param game {object} Current Phaser game instance.
@@ -533,6 +517,8 @@ function Mouse(game, map, group) {
  *
  * @property twoD.x {number} 2d x position.
  * @property twoD.y {number} 2d y position.
+ * @property threeD.x {number} 3d x position.
+ * @property threeD.y {number} 3d y position.
  * @property inBounds {boolean} Is the mouse pointer within the world boundaries?
  *
  * @this Mouse
@@ -620,6 +606,77 @@ Mouse.prototype.reset = function () {
         }
     });
 };
+
+"use strict";
+
+(function () {})();
+/**
+ * Created by apizzimenti on 5/19/16.
+ */
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Binds the left, right, up, and down keys to the running game instance.
+ *
+ * @param game {object} Phaser game instance.
+ * @param context {object} the context game is bound to.
+ */
+
+function keymap(game, context) {
+
+    context.cursors = game.input.keyboard.createCursorKeys();
+
+    context.game.input.keyboard.addKeyCapture([Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.UP, Phaser.Keyboard.DOWN]);
+
+    return {
+        esc: game.input.keyboard.addKey(Phaser.Keyboard.ESC),
+        space: game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
+    };
+};
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Changes the direction of the given sprite based on keypresses.
+ *
+ * @param Player {Player} Phaser Player sprite.
+ * @param context {object} the context game is bound to.
+ */
+
+function keymapTrack(Player, context) {
+
+    /**
+     * Default speed in px/s for specified sprite.
+     * @type {number}
+     */
+
+    var speed = 50,
+        sprite = Player.sprite;
+
+    sprite.body.velocity.z = 0;
+    // sprite.isoZ = -3 + (3 * Math.sin(sprite.isoX + sprite.isoY));
+
+    if (context.cursors.up.isDown) {
+        sprite.body.velocity.y = -speed;
+        sprite.direction = 1;
+    } else if (context.cursors.down.isDown) {
+        sprite.body.velocity.y = speed;
+        sprite.direction = 3;
+    } else {
+        sprite.body.velocity.y = 0;
+    }
+
+    if (context.cursors.left.isDown) {
+        sprite.body.velocity.x = -speed;
+        sprite.direction = 2;
+    } else if (context.cursors.right.isDown) {
+        sprite.body.velocity.x = speed;
+        sprite.direction = 0;
+    } else {
+        sprite.body.velocity.x = 0;
+    }
+}
 
 "use strict";
 
@@ -732,6 +789,7 @@ Animal.prototype.isVisible = function (Player) {
  * random floating point value such that 0 < <code>n</code> < 3 and is changed at every event firing.
  *
  * @property rand {number} Current random time interval.
+ * @property loopedMovement {object} Phaser looped event.
  *
  * @this Animal
  *
@@ -745,7 +803,7 @@ Animal.prototype.timedMovement = function () {
 
     this.rand = Math.random() * 3;
 
-    this.game.time.events.loop(Phaser.Timer.SECOND * 3 + this.rand, function () {
+    this.loopedMovement = this.game.time.events.loop(Phaser.Timer.SECOND * 3 + this.rand, function () {
         dir = Math.floor(Math.random() * 4);
         _this.rand = Math.random() * 3;
 
@@ -789,7 +847,8 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
 
     var e = new EasyStar.js(),
         row = this.sprite.row,
-        col = this.sprite.col;
+        col = this.sprite.col,
+        dirs = [];
 
     e.setGrid(this.map.blocked);
     e.setAcceptableTiles([1]);
@@ -800,12 +859,68 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
         if (!path) {
             console.log("path not found");
         } else {
-            _this3.game.time.events.stop();
-            console.dir(path);
+            _this3.game.time.events.remove(_this3.loopedMovement);
+            dirs = determineDirections(path);
+            _this3.followDirection(true, path, dirs);
         }
     });
 
     e.calculate();
+};
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Recursive method for following a set of path instructions from EasyStar.js.
+ *
+ * @param begin {boolean} Is this the first iteration?
+ * @param path {object[]} Array of coordinate objects.
+ * @param dirs {number[]} Array of directions.
+ *
+ * @property sprite.tween {object} Phaser tween object that will be chained to.
+ *
+ * @this Animal
+ */
+
+Animal.prototype.followDirection = function (begin, path, dirs) {
+    var _this4 = this;
+
+    var dim = this.map.tileSize,
+        r = path[0].x,
+        c = path[0].y,
+        x = r * dim,
+        y = c * dim,
+        tween,
+        end = dirs.length === 0 || path.length === 1;
+
+    if (begin) {
+        var _game$add$tween;
+
+        this.sprite.tween = (_game$add$tween = this.game.add.tween(this.sprite)).to.apply(_game$add$tween, [{ isoX: x, isoY: y }].concat(_toConsumableArray(globals.tween)));
+
+        this.sprite.tween.onComplete.add(function () {
+            _this4.sprite.direction = dirs[0];
+            path.splice(0, 1);
+            dirs.splice(0, 1);
+
+            _this4.followDirection(false, path, dirs);
+        });
+    } else if (!begin && !end) {
+        var _tween;
+
+        tween = this.game.add.tween(this.sprite);
+        this.sprite.tween.chain((_tween = tween).to.apply(_tween, [{ isoX: x, isoY: y }].concat(_toConsumableArray(globals.tween))));
+
+        tween.onComplete.add(function () {
+            _this4.sprite.direction = dirs[0];
+            path.splice(0, 1);
+            dirs.splice(0, 1);
+
+            _this4.followDirection(false, path, dirs);
+        });
+    } else if (!begin && end) {
+        this.timedMovement();
+    }
 };
 
 /**
@@ -1559,7 +1674,7 @@ contextMenu.prototype.createContextMenu = function () {
  * @constructor
  */
 
-function contextMenu(Inventory) {
+function ContextMenu(Inventory) {
 
     this.Inventory = Inventory;
     this.game = this.Inventory.game;
@@ -1575,7 +1690,7 @@ function contextMenu(Inventory) {
  * @this contextMenu
  */
 
-contextMenu.prototype.createContextMenu = function () {
+ContextMenu.prototype.createContextMenu = function () {
     var _this = this;
 
     var x = this.mouse.twoD.x,
@@ -1591,6 +1706,79 @@ contextMenu.prototype.createContextMenu = function () {
 
     this.mouse.mouse.onDown.add(function () {
         _this.menu.destroy();
+    });
+};
+
+"use strict";
+
+(function () {})();
+/**
+ * Created by apizzimenti on 7/21/16.
+ */
+
+function Guide(element, gameElement) {
+    var _this = this;
+
+    this.raw = {};
+    this.raw.guide = document.getElementById(element);
+    this.raw.game = document.getElementById(gameElement);
+    this.raw.canvas = this.raw.game.getElementsByTagName("canvas")[0];
+    this.raw.guideHtml = this.raw.guide.innerHTML;
+    this.raw.offsetTop = this.raw.canvas.offsetTop;
+    this.raw.offsetLeft = this.raw.canvas.offsetLeft;
+    this.raw.on = false;
+
+    $(document).ready(function () {
+        _this.guideElement = $("#" + element);
+        _this.guideElement.css("display", "none");
+
+        _this.button();
+    });
+}
+
+Guide.prototype.button = function () {
+    var _this2 = this;
+
+    var button = document.createElement("button"),
+        buttonText = document.createTextNode("i"),
+        id = "guideButton",
+        template = "#" + id;
+
+    button.id = id;
+    button.appendChild(buttonText);
+    this.raw.game.appendChild(button);
+    this.raw.guideButton = button;
+
+    $(template).css({
+        "position": "absolute",
+        "top": this.raw.offsetTop + 20,
+        "left": this.raw.offsetLeft + 20,
+        "background-color": "transparent",
+        "color": "#FFF",
+        "border": "none",
+        "font-family": "Courier",
+        "font-size": "20px"
+    });
+
+    $(template).hover(function () {
+        $(template).css({
+            "cursor": "pointer"
+        });
+    });
+
+    $(template).click(function () {
+
+        $(template).css({
+            "outline": "none"
+        });
+
+        if (!_this2.raw.on) {
+            $(template).append(_this2.raw.guideHtml);
+            _this2.raw.on = true;
+        } else {
+            $(template).empty();
+            _this2.raw.on = false;
+        }
     });
 };
 
@@ -1682,7 +1870,7 @@ function Inventory(game, map, width, height, mouse, escape, itemGroup) {
     window.graphics = graphics;
 
     this.messages = new Message(this.game, this.height, 14);
-    this.contextMenu = new contextMenu(this);
+    this.contextMenu = new ContextMenu(this);
 
     this.onClick();
 }
@@ -1712,10 +1900,6 @@ Inventory.prototype.addItem = function (item) {
 
     item.inventorySprite.inputEnabled = true;
     item.inventorySprite.input.useHandCursor = true;
-
-    if (item.key.includes("bunny")) {
-        name = "bunny";
-    }
 
     item.text = this.game.add.text(x, y, name, {
         font: "Courier",
@@ -1975,6 +2159,8 @@ Message.prototype.add = function (message) {
  * @desc Displays the message on the screen for five seconds, with in and out tweens.
  *
  * @this Message
+ *
+ * @todo get messages queue to work
  */
 
 Message.prototype.display = function () {

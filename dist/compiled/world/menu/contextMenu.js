@@ -22,7 +22,7 @@
  * @constructor
  */
 
-function contextMenu(Inventory) {
+function ContextMenu(Inventory) {
 
     this.Inventory = Inventory;
     this.game = this.Inventory.game;
@@ -38,7 +38,7 @@ function contextMenu(Inventory) {
  * @this contextMenu
  */
 
-contextMenu.prototype.createContextMenu = function () {
+ContextMenu.prototype.createContextMenu = function () {
     var _this = this;
 
     var x = this.mouse.twoD.x,

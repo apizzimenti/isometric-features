@@ -149,3 +149,45 @@ function manipulateDirection(sprite, d) {
             break;
     }
 }
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Determines the directional values for a sprite based on a set of path instructions.
+ *
+ * @param path {object[]} Array of coordinate objects.
+ *
+ * @returns {number[]} The directions, in succession, that the sprite will be facing on this path.
+ */
+
+function determineDirections(path) {
+
+    var x,
+        y,
+        x_1,
+        y_1,
+        last = [];
+
+    for (var i = 0; i < path.length; i++) {
+
+        if (i + 1 < path.length) {
+
+            x = path[i].x;
+            y = path[i].y;
+            x_1 = path[i + 1].x;
+            y_1 = path[i + 1].y;
+
+            if (x > x_1) {
+                last.push(2);
+            } else if (x < x_1) {
+                last.push(0);
+            } else if (y > y_1) {
+                last.push(1);
+            } else if (y < y_1) {
+                last.push(3);
+            }
+        } else {
+            return last;
+        }
+    }
+}

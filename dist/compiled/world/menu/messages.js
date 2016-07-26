@@ -68,6 +68,8 @@ Message.prototype.add = function (message) {
  * @desc Displays the message on the screen for five seconds, with in and out tweens.
  *
  * @this Message
+ *
+ * @todo get messages queue to work
  */
 
 Message.prototype.display = function () {
