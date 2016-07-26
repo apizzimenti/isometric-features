@@ -173,7 +173,7 @@ var isogame = function (scope, injector) {
 
             // debug usually goes here
             
-            debug.sprite(creatures);
+            // debug.sprite(creatures);
         }
     };
 
