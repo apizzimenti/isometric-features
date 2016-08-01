@@ -13,6 +13,7 @@
  * @param game {object} Current game instance.
  * @param key {string} Cached Phaser texture key.
  * @param inventory {Inventory} Game's Inventory instance.
+ * @param scope {object} Angular scope.
  * 
  * @class {object} Candy
  * @extends Item

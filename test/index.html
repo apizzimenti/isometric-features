@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>Title</title>
 
-    <!-- include: "type": "css", "files": ["<%= app.testStyles %>"] -->
+    <!-- include: "type": "css", "files": ["<%= app.styles %>", "<%= app.testStyles %>"] -->
+    <link href="../lib/styles/guide.css" rel="stylesheet" type="text/css">
     <link href="../test/styles/main.css" rel="stylesheet" type="text/css">
     <!-- /include -->
 </head>
@@ -34,6 +35,8 @@
     <div ng-app="game">
         <game></game>
     </div>
+
+    <div id="guide"><h1>nothing?</h1></div>
 
 </body>
 </html>

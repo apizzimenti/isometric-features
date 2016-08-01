@@ -112,6 +112,9 @@ var isogame = function (scope, injector) {
             portion of this app, each of its properties can be accessed. New sprites, items, messages, and lots more
             can be added or modified
             */
+            
+            guide = new Guide("guide", "gameCanvas");
+            
             that.assign = function () {
                 that.debug = debug;
                 that.map = map;

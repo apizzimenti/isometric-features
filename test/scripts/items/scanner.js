@@ -13,6 +13,7 @@
  * @param inventoryKey {string} Cached Phaser image or texture.
  * @param keys {string[]} Array of cached Phaser images.
  * @param inventory {Inventory} Game's Inventory.
+ * @param space {object} Phaser keyboard object.
  *
  * @class {object} Scanner
  * @this Scanner
