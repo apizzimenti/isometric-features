@@ -11,3 +11,6 @@ node_modules
 .yo-rc.json
 
 *.log
+
+**/*.sass
+**/*.css.map
