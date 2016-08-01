@@ -10,6 +10,7 @@
     "grunt": "~0.4.2",
     "grunt-babel": "^6.0.0",
     "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-cssmin": "^1.0.1",
     "grunt-contrib-jshint": "~0.7.2",
     "grunt-contrib-nodeunit": "*",
     "grunt-contrib-uglify": "~0.2.7",
