@@ -106,14 +106,15 @@ var isogame = function (scope, injector) {
             // create the Inventory system and load items into it
             inventory = new Inventory(game, map, width, height, mouse, escape, characters);
             load.inventory(inventory, space);
+            
+            // create a guide
+            guide = new Guide("guide", "gameCanvas");
 
             /*
             this allows the game to be accessed from outside this file; when a new game is created in the angular
             portion of this app, each of its properties can be accessed. New sprites, items, messages, and lots more
             can be added or modified
             */
-            
-            guide = new Guide("guide", "gameCanvas");
             
             that.assign = function () {
                 that.debug = debug;
