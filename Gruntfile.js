@@ -110,6 +110,18 @@ module.exports = function (grunt) {
                 cwd: "lib/"
             },
             files: ["**/*.js"]
+        },
+    
+        cssmin: {
+            target: {
+                files: [{
+                    expand: true,
+                    cwd: 'lib/styles/',
+                    src: ['*.css', '!*.min.css'],
+                    dest: 'dist/',
+                    ext: '.min.css'
+                }]
+            }
         }
     });
 
@@ -117,6 +129,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks("grunt-include-source");
+    grunt.loadNpmTasks("grunt-contrib-cssmin");
     grunt.loadNpmTasks("grunt-babel");
     grunt.loadNpmTasks("grunt-jsdoc");
     grunt.loadNpmTasks("grunt-wiredep");
@@ -125,6 +138,6 @@ module.exports = function (grunt) {
     // Default task
     grunt.registerTask('default', ["strictly", "jsdoc"]);
     grunt.registerTask("test", ["includeSource", "wiredep"]);
-    grunt.registerTask("build", ["strictly", "babel", "concat", "uglify", "jsdoc"]);
+    grunt.registerTask("build", ["strictly", "babel", "cssmin", "concat", "uglify", "jsdoc"]);
 };
 
