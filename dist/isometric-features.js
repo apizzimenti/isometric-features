@@ -1239,11 +1239,25 @@ ContextMenu.prototype.createContextMenu = function () {
  *
  * @desc Element for containing how-to information and making it visible (or invisible) to the player.
  *
- * @param element {string} String id for the HTML element that will serve as your guide (typically a button).
+ * @param element {string} String id for the HTML element that will serve as your guide..
  * @param gameElement {string} String id for element that hosts the game canvas (the same name as when the Phaser game is initialized).
  * @param [styles=null] {object} Custom style overrides.
  *
  * @example
+ *
+ * // index.html
+ * // in your html, simply include an element containing guide information, like so:
+ *
+ * ...
+ *     <div id="guide">
+ *         <h1>Introduction</h1>
+ *             Blah blah blah...
+ *     </div>
+ * ...
+ *
+ *
+ * // .js file where game is located
+ *
  * var guide;
  *
  * // no custom styles
@@ -1254,6 +1268,8 @@ ContextMenu.prototype.createContextMenu = function () {
  *    "color": "black",
  *    "text-align": "center"
  * });
+ *
+ * // check the test/ folder for a usable example.
  *
  * @class Animal
  * @constructor
