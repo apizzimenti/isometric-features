@@ -8,6 +8,9 @@ module.exports = function (grunt) {
                 "dist/isometric-features.js",
                 "test/scripts/**/*.js"
             ],
+            styles: [
+                "lib/styles/**/*.css"
+            ],
             testStyles: [
                 "test/styles/**/*.css"
             ]
