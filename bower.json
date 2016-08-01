@@ -2,6 +2,7 @@
   "name": "isometric-features",
   "description": "Supplemental features for the phaser isometric plugin.",
   "author": "Anthony Pizzimenti <pizzimentianthony@gmail.com>",
+  "repository": "https://github.com/apizzimenti/isometric-features.git",
   "license": "MIT",
   "ignore": [
     "node_modules",
@@ -17,5 +18,8 @@
   },
   "devDependencies": {},
   "appPath": "app",
-  "main": "dist/isometric-features.js"
+  "main": [
+    "dist/guide.min.css",
+    "dist/isometric-features.js"
+  ]
 }
