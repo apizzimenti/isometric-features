@@ -5,10 +5,37 @@
  * Created by apizzimenti on 7/21/16.
  */
 
-function Guide(element, gameElement) {
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Element for containing how-to information and making it visible (or invisible) to the player.
+ *
+ * @param element {string} String id for the HTML element that will serve as your guide (typically a button).
+ * @param gameElement {string} String id for element that hosts the game canvas (the same name as when the Phaser game is initialized).
+ * @param [styles=null] {object} Custom style overrides.
+ *
+ * @example
+ * var guide;
+ *
+ * // no custom styles
+ * guide = new Guide("guide", "gameCanvas")
+ *
+ * // custom styles
+ * guide = new Guide("guide", "gameCanvas", {
+ *    "color": "black",
+ *    "text-align": "center"
+ * });
+ *
+ * @class Animal
+ * @constructor
+ */
+
+function Guide(element, gameElement, styles) {
+
     var _this = this;
 
     this.raw = {};
+    this.raw.guideId = element;
     this.raw.guide = document.getElementById(element);
     this.raw.game = document.getElementById(gameElement);
     this.raw.canvas = this.raw.game.getElementsByTagName("canvas")[0];
@@ -16,37 +43,42 @@ function Guide(element, gameElement) {
     this.raw.offsetTop = this.raw.canvas.offsetTop;
     this.raw.offsetLeft = this.raw.canvas.offsetLeft;
     this.raw.on = false;
+    this.raw.guide.styles = styles || null;
 
     $(document).ready(function () {
         _this.guideElement = $("#" + element);
-        _this.guideElement.css("display", "none");
 
+        _this.configureWindow();
         _this.button();
     });
 }
 
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Generates a button on top of the game canvas for displaying help information.
+ *
+ * @this Guide
+ */
+
 Guide.prototype.button = function () {
-    var _this2 = this;
 
     var button = document.createElement("button"),
         buttonText = document.createTextNode("i"),
         id = "guideButton",
-        template = "#" + id;
+        template = "#" + id,
+        _this = this;
 
     button.id = id;
     button.appendChild(buttonText);
     this.raw.game.appendChild(button);
     this.raw.guideButton = button;
+    this.raw.guideButton.className = "guide-button";
+    this.raw.guideButton.on = false;
 
     $(template).css({
-        "position": "absolute",
-        "top": this.raw.offsetTop + 20,
-        "left": this.raw.offsetLeft + 20,
-        "background-color": "transparent",
-        "color": "#FFF",
-        "border": "none",
-        "font-family": "Courier",
-        "font-size": "20px"
+        "top": _this.raw.offsetTop + 20,
+        "left": _this.raw.offsetLeft + 20
     });
 
     $(template).hover(function () {
@@ -57,16 +89,48 @@ Guide.prototype.button = function () {
 
     $(template).click(function () {
 
-        $(template).css({
-            "outline": "none"
-        });
-
-        if (!_this2.raw.on) {
-            $(template).append(_this2.raw.guideHtml);
-            _this2.raw.on = true;
+        if (!_this.raw.guideButton.on) {
+            _this.raw.guideButton.on = true;
+            $("#" + _this.raw.guideId).css({
+                "display": "block"
+            });
         } else {
-            $(template).empty();
-            _this2.raw.on = false;
+            _this.raw.guideButton.on = false;
+            $("#" + _this.raw.guideId).css({
+                "display": "none"
+            });
         }
     });
+};
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Generates the guide window and its dimensions, positioning, style.
+ *
+ * @this Guide
+ */
+
+Guide.prototype.configureWindow = function () {
+
+    var template = "#" + this.raw.guideId,
+        w = window.innerWidth / 2,
+        h = window.innerHeight / 2,
+        top = window.innerHeight / 4,
+        left = window.innerWidth / 4,
+        el = this.raw.guide;
+
+    el.className = "guide";
+
+    $(template).css({
+        "display": "none",
+        "left": left,
+        "top": top,
+        "width": w,
+        "height": h
+    });
+
+    if (this.raw.guide.styles) {
+        $(template).css(this.raw.guide.styles);
+    }
 };
