@@ -1,0 +1,29 @@
+@import 'https://fonts.googleapis.com/css?family=VT323';
+.guide-button {
+  position: absolute;
+  background: transparent;
+  color: #FFF;
+  border: none;
+  font-family: "Courier", "monospace";
+  font-size: 20px;
+  text-align: left; }
+  .guide-button:hover {
+    cursor: pointer; }
+  .guide-button:active {
+    outline: none; }
+  .guide-button:focus {
+    outline: none; }
+
+.guide {
+  position: absolute;
+  background: rgba(131, 131, 131, 0.6);
+  overflow: scroll;
+  color: #FFFFFF;
+  text-align: left;
+  padding: 10px;
+  font-family: "VT323", "monospace"; }
+  .guide h1 {
+    text-decoration: underline;
+    text-decoration-color: #6D6867; }
+
+/*# sourceMappingURL=guide.css.map */
