@@ -1237,7 +1237,8 @@ ContextMenu.prototype.createContextMenu = function () {
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Element for containing how-to information and making it visible (or invisible) to the player.
+ * @desc Element for containing how-to information and making it visible (or invisible) to the player. The guide
+ * will always appear in the center of the sceen and be 1/2 the dimensions of the game window (unless overridden).
  *
  * @param element {string} String id for the HTML element that will serve as your guide..
  * @param gameElement {string} String id for element that hosts the game canvas (the same name as when the Phaser game is initialized).
