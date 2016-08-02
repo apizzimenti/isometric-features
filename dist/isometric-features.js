@@ -1359,10 +1359,11 @@ Guide.prototype.button = function () {
 Guide.prototype.configureWindow = function () {
 
     var template = "#" + this.raw.guideId,
-        w = window.innerWidth / 2,
-        h = window.innerHeight / 2,
-        top = window.innerHeight / 4,
-        left = window.innerWidth / 4,
+        canvas = this.raw.canvas,
+        w = canvas.width / 2,
+        h = canvas.height / 2,
+        top = canvas.height / 4 + canvas.offsetTop,
+        left = canvas.offsetLeft + canvas.width / 4,
         el = this.raw.guide;
 
     el.className = "guide";
