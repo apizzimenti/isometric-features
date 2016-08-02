@@ -3,7 +3,7 @@ body {
   overflow: hidden; }
 
 .guide-button {
-  position: fixed;
+  position: absolute;
   background: transparent;
   color: #FFF;
   border: none;
