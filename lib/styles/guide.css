@@ -15,7 +15,7 @@
     outline: none; }
 
 .guide {
-  position: absolute;
+  position: fixed;
   background: rgba(131, 131, 131, 0.6);
   overflow: scroll;
   font-size: 16px;
