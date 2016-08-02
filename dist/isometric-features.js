@@ -1,4 +1,4 @@
-/*! iso-game-features - v0.0.1 - 2016-08-01
+/*! iso-game-features - v0.0.1 - 2016-08-02
 * Copyright (c) 2016 ; Licensed MIT */
 "use strict";
 
