@@ -1281,6 +1281,7 @@ function Guide(element, gameElement, styles) {
 
     this.raw = {};
     this.raw.guideId = element;
+    this.raw.canvasId = gameElement;
     this.raw.guide = document.getElementById(element);
     this.raw.game = document.getElementById(gameElement);
     this.raw.canvas = this.raw.game.getElementsByTagName("canvas")[0];
@@ -1359,11 +1360,12 @@ Guide.prototype.button = function () {
 Guide.prototype.configureWindow = function () {
 
     var template = "#" + this.raw.guideId,
+        offset = $("#" + this.raw.canvasId).offset(),
         canvas = this.raw.canvas,
         w = canvas.width / 2,
         h = canvas.height / 2,
-        top = canvas.height / 4 + canvas.offsetTop,
-        left = canvas.offsetLeft + canvas.width / 4,
+        top = h / 2 + offset.top,
+        left = (window.innerWidth - canvas.offsetWidth + w) / 2,
         el = this.raw.guide;
 
     el.className = "guide";
