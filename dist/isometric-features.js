@@ -1,4 +1,4 @@
-/*! iso-game-features - v0.0.1 - 2016-08-02
+/*! iso-game-features - v0.0.1 - 2016-08-03
 * Copyright (c) 2016 ; Licensed MIT */
 "use strict";
 
@@ -1272,7 +1272,7 @@ ContextMenu.prototype.createContextMenu = function () {
  *
  * // check the test/ folder for a usable example.
  *
- * @class Animal
+ * @class Guide
  * @constructor
  */
 

@@ -43,7 +43,7 @@
  *
  * // check the test/ folder for a usable example.
  *
- * @class Animal
+ * @class Guide
  * @constructor
  */
 
