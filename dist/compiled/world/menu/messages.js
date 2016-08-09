@@ -13,6 +13,8 @@
  * @param game {object} Current Phaser game instance.
  * @param y {number} Height of the game.
  * @param size {number} Font size.
+ * @param [loc="bottom_left"] {string} Preferred location for messages: can be <code>"bottom_left"</code>, <code>"bottom_right"</code>,
+ * <code>"top_left"</code>, or <code>"top_right"</code>.
  *
  * @property game {object} Phaser game instance.
  * @property y {number} Height of the game.
@@ -28,12 +30,13 @@
  * @constructor
  */
 
-function Message(game, y, size) {
+function Message(game, y, size, loc) {
     var _this = this;
 
     this.game = game;
     this.y = y;
     this.message = "";
+    this.loc = loc;
     this.fontSize = size;
     this.style = {
         font: size + "px Courier",
@@ -77,7 +80,7 @@ Message.prototype.display = function () {
 
     var str = this.format(this.message);
 
-    this.text = this.game.add.text(str.width, str.height, str.message, this.style);
+    this.text = this.game.add.text(str.x, str.y, str.msg, this.style);
 
     this.text.alpha = 0;
     this.text.fixedToCamera = true;
@@ -96,15 +99,17 @@ Message.prototype.display = function () {
  *
  * @param message {string} Message to be formatted.
  *
- * @returns {{width: number, height: number, message: string}} Width and height of Phaser message area; formatted string.
+ * @returns {{x: number, y: number, msg: string}} Width and height of Phaser message area; formatted string.
  *
  * @todo Format according to where words are, not just the 60th character.
  */
 
 Message.prototype.format = function (message) {
+
     var last = 0,
         strs = [],
-        dist = message.length % 60 ? message.length - message.length % 60 : 0;
+        dist = message.length % 60 ? message.length - message.length % 60 : 0,
+        vals = {};
 
     for (var i = 0; i < message.length; i++) {
 
@@ -119,9 +124,31 @@ Message.prototype.format = function (message) {
         }
     }
 
-    return {
-        width: 10,
-        height: this.y - strs.length * (this.fontSize * 1.8),
-        message: strs.join(" ")
-    };
+    switch (this.loc) {
+
+        case "bottom_left":default:
+            vals.x = 10;
+            vals.y = this.y - strs.length * this.fontSize * 1.8;
+            break;
+
+        case "top_left":
+            vals.x = 10;
+            vals.y = strs.length * (this.fontSize * 1.8);
+            break;
+
+        case "top_right":
+            vals.x = this.game.width - 540;
+            vals.y = 10;
+            break;
+
+        case "bottom_right":
+            vals.x = this.game.width - 540;
+            vals.y = this.y - strs.length * this.fontSize * 1.8;
+            break;
+    }
+
+    console.log(strs[0].length * this.fontSize);
+
+    vals.msg = strs.join(" ");
+    return vals;
 };

@@ -16,6 +16,7 @@
  * @param escape {object} Phaser key object.
  * @param itemGroup {object} Phaser Isometric sprite group.
  * @param map {Map} Game's Map object.
+ * @param [messagePos="bottom_left"] {string} Location for messages to appear.
  *
  * @property game {object} Current game instance.
  * @property map {Map} Game's Map object.
@@ -42,10 +43,12 @@
  * @this Inventory
  * @constructor
  *
+ * @see Message
+ *
  * @todo implement tooltip stuff.
  */
 
-function Inventory(game, map, width, height, mouse, escape, itemGroup) {
+function Inventory(game, map, width, height, mouse, escape, itemGroup, messagePos) {
 
     this.game = game;
     this.width = width;
@@ -89,7 +92,7 @@ function Inventory(game, map, width, height, mouse, escape, itemGroup) {
 
     window.graphics = graphics;
 
-    this.messages = new Message(this.game, this.height, 14);
+    this.messages = new Message(this.game, this.height, 14, messagePos);
     this.contextMenu = new ContextMenu(this);
 
     this.onClick();
