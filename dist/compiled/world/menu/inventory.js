@@ -10,8 +10,6 @@
  * @desc Creates the game Inventory.
  *
  * @param game {object} Current game instance.
- * @param width {number} Phaser game window width.
- * @param height {number} Phaser game window height.
  * @param mouse {Mouse} Mouse object.
  * @param escape {object} Phaser key object.
  * @param itemGroup {object} Phaser Isometric sprite group.
@@ -48,11 +46,11 @@
  * @todo implement tooltip stuff.
  */
 
-function Inventory(game, map, width, height, mouse, escape, itemGroup, messagePos) {
+function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
 
     this.game = game;
-    this.width = width;
-    this.height = height;
+    this.width = this.game.width;
+    this.height = this.game.height;
     this.mouse = mouse;
     this.escape = escape;
     this.times = 0;

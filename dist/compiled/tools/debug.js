@@ -10,7 +10,6 @@
  * @desc Provides an easy way to specify debugging within the Phaser game.
  *
  * @param game {object} Phaser game instance.
- * @param width {number} Width of the Phaser game window.
  *
  * @property game {game} Phaser game instance.
  * @property x {number} Middle of the Phaser game window.
@@ -23,10 +22,10 @@
  * @constructor
  */
 
-function Debug(game, width) {
+function Debug(game) {
 
     this.game = game;
-    this.x = width / 2;
+    this.x = this.game.width / 2;
     this.y = 20;
     this.color = "#FFF";
     this.on = true;

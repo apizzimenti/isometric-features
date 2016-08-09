@@ -258,7 +258,6 @@ function determineDirections(path) {
  * @desc Provides an easy way to specify debugging within the Phaser game.
  *
  * @param game {object} Phaser game instance.
- * @param width {number} Width of the Phaser game window.
  *
  * @property game {game} Phaser game instance.
  * @property x {number} Middle of the Phaser game window.
@@ -271,10 +270,10 @@ function determineDirections(path) {
  * @constructor
  */
 
-function Debug(game, width) {
+function Debug(game) {
 
     this.game = game;
-    this.x = width / 2;
+    this.x = this.game.width / 2;
     this.y = 20;
     this.color = "#FFF";
     this.on = true;
@@ -1677,8 +1676,6 @@ Guide.prototype.configureWindow = function () {
  * @desc Creates the game Inventory.
  *
  * @param game {object} Current game instance.
- * @param width {number} Phaser game window width.
- * @param height {number} Phaser game window height.
  * @param mouse {Mouse} Mouse object.
  * @param escape {object} Phaser key object.
  * @param itemGroup {object} Phaser Isometric sprite group.
@@ -1715,11 +1712,11 @@ Guide.prototype.configureWindow = function () {
  * @todo implement tooltip stuff.
  */
 
-function Inventory(game, map, width, height, mouse, escape, itemGroup, messagePos) {
+function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
 
     this.game = game;
-    this.width = width;
-    this.height = height;
+    this.width = this.game.width;
+    this.height = this.game.height;
     this.mouse = mouse;
     this.escape = escape;
     this.times = 0;
