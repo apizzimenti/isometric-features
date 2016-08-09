@@ -90,7 +90,7 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
 
     window.graphics = graphics;
 
-    this.messages = new Message(this.game, this.height, 14, messagePos);
+    this.messages = new Message(this.game, 14, messagePos);
     this.contextMenu = new ContextMenu(this);
 
     this.onClick();

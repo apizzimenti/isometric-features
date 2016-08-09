@@ -11,7 +11,6 @@
  * @desc The Message structure handles all the popup messages in the game.
  *
  * @param game {object} Current Phaser game instance.
- * @param y {number} Height of the game.
  * @param size {number} Font size.
  * @param [loc="bottom_left"] {string} Preferred location for messages: can be <code>"bottom_left"</code>, <code>"bottom_right"</code>,
  * <code>"top_left"</code>, or <code>"top_right"</code>.
@@ -30,11 +29,11 @@
  * @constructor
  */
 
-function Message(game, y, size, loc) {
+function Message(game, size, loc) {
     var _this = this;
 
     this.game = game;
-    this.y = y;
+    this.y = this.game.height;
     this.message = "";
     this.loc = loc;
     this.fontSize = size;

@@ -1756,7 +1756,7 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
 
     window.graphics = graphics;
 
-    this.messages = new Message(this.game, this.height, 14, messagePos);
+    this.messages = new Message(this.game, 14, messagePos);
     this.contextMenu = new ContextMenu(this);
 
     this.onClick();
@@ -1988,7 +1988,6 @@ Inventory.prototype.placeItem = function () {
  * @desc The Message structure handles all the popup messages in the game.
  *
  * @param game {object} Current Phaser game instance.
- * @param y {number} Height of the game.
  * @param size {number} Font size.
  * @param [loc="bottom_left"] {string} Preferred location for messages: can be <code>"bottom_left"</code>, <code>"bottom_right"</code>,
  * <code>"top_left"</code>, or <code>"top_right"</code>.
@@ -2007,11 +2006,11 @@ Inventory.prototype.placeItem = function () {
  * @constructor
  */
 
-function Message(game, y, size, loc) {
+function Message(game, size, loc) {
     var _this = this;
 
     this.game = game;
-    this.y = y;
+    this.y = this.game.height;
     this.message = "";
     this.loc = loc;
     this.fontSize = size;
