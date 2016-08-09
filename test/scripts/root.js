@@ -15,7 +15,7 @@ var isogame = function (scope, injector) {
         orig_height = window.innerHeight,
         width = 1024,
         height = 768,
-        game = new Phaser.Game(1024, 768, Phaser.CANVAS, "gameCanvas", null, true, false),
+        game = new Phaser.Game(width, height, Phaser.CANVAS, "gameCanvas", null, true, false),
         
     // Empty variables for the two groups: the tile group and the character group.
         groundTiles,
@@ -75,7 +75,7 @@ var isogame = function (scope, injector) {
                 space,
                 guide;
             
-            debug = new Debug(game, width);
+            debug = new Debug(game);
 
             // new group for tiles
             groundTiles = game.add.group();
@@ -104,7 +104,7 @@ var isogame = function (scope, injector) {
             space = keys.space;
 
             // create the Inventory system and load items into it
-            inventory = new Inventory(game, map, width, height, mouse, escape, characters, "top_right");
+            inventory = new Inventory(game, map, mouse, escape, characters, "top_right");
             load.inventory(inventory, space);
             
             // create a guide
