@@ -1743,7 +1743,7 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
     graphics.fixedToCamera = true;
     graphics.lineStyle(2, 0xFF0000, 1);
     graphics.beginFill(0xFF0000, 0.4);
-    graphics.drawRect(width - areaWidth, height - areaHeight, areaWidth, areaHeight);
+    graphics.drawRect(this.width - areaWidth, this.height - areaHeight, areaWidth, areaHeight);
     this.graphics = graphics;
 
     this.area = {};
