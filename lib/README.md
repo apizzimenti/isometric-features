@@ -1,9 +1,3 @@
-## PlanetZ
-
-This project is part of the Innovations in Teaching with Technology Award to Sheila Barron. This project is comprised of
-many games, but this documentation refers to the Phaser Isometric tagging game.
-
-
 ### Common Errors
 
 #### `tileset is attempting to enable a physics body with an unknown physics system.`
