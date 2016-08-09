@@ -28,6 +28,9 @@ function Candy (game, key, inventory, scope) {
 Candy.prototype = Object.create(Item.prototype);
 
 Candy.prototype.action = function () {
+    
+    this.inventory.messages.add("Hey! I think this is going to go really well. I don't really doubt it, but I just" +
+        " hope that it goes as well as we can get it.");
 
     this.scope.$emit("pathfind", {
         row: this.sprite.row,

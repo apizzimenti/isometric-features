@@ -104,7 +104,7 @@ var isogame = function (scope, injector) {
             space = keys.space;
 
             // create the Inventory system and load items into it
-            inventory = new Inventory(game, map, width, height, mouse, escape, characters);
+            inventory = new Inventory(game, map, width, height, mouse, escape, characters, "top_right");
             load.inventory(inventory, space);
             
             // create a guide
