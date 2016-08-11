@@ -1,4 +1,4 @@
-/*! iso-game-features - v0.0.1 - 2016-08-09
+/*! iso-game-features - v0.0.1 - 2016-08-11
 * Copyright (c) 2016 ; Licensed MIT */
 "use strict";
 
@@ -2122,8 +2122,6 @@ Message.prototype.format = function (message) {
             vals.y = this.y - strs.length * this.fontSize * 1.8;
             break;
     }
-
-    console.log(strs[0].length * this.fontSize);
 
     vals.msg = strs.join(" ");
     return vals;
