@@ -36,7 +36,7 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
     var tile,
         tileArray = [],
         blockedArray = [],
-        tiles = preferredTiles || this.createTileMap(mapSize),
+        tiles = preferredTiles || this._createTileMap(mapSize),
         worldBounds = dim(tileSize, mapSize, 1),
         atlas_json_exists = game.cache.checkImageKey(tileSet),
         frame = null;
@@ -49,7 +49,7 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
     this.fog = fog;
 
     if (atlas_json_exists) {
-        this.generateMapKeys();
+        this._generateMapKeys();
         frame = globals.mapTileKey[3];
     } else {
         frame = null;
@@ -111,12 +111,14 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
  *
  * @desc Creates a size * size array with randomly assigned tiles. Can be modified to create a custom game map.
  *
+ * @private
+ *
  * @param size {number} Desired map size.
  *
  * @returns {sprite[]}
  */
 
-Map.prototype.createTileMap = function (size) {
+Map.prototype._createTileMap = function (size) {
 
     var tileMap = [];
 
@@ -144,10 +146,12 @@ Map.prototype.createTileMap = function (size) {
  *
  * @desc Generates global list of available tile keys.
  *
+ * @private
+ *
  * @this Map
  */
 
-Map.prototype.generateMapKeys = function () {
+Map.prototype._generateMapKeys = function () {
     var _iteratorNormalCompletion = true;
     var _didIteratorError = false;
     var _iteratorError = undefined;

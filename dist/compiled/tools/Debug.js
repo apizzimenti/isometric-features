@@ -154,7 +154,7 @@ Debug.prototype.tiles = function (tiles) {
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Allows for future implementation of a button on/off switch for displaying debug info.
+ * @desc Allows for future implementation of a _button on/off switch for displaying debug info.
  *
  * @this Debug
  *

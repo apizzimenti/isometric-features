@@ -66,20 +66,22 @@ function Guide(element, gameElement, styles) {
     $(document).ready(function () {
         _this.guideElement = $("#" + element);
 
-        _this.configureWindow();
-        _this.button();
+        _this._configureWindow();
+        _this._button();
     });
 }
 
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Generates a button on top of the game canvas for displaying help information.
+ * @desc Generates a _button on top of the game canvas for displaying help information.
+ *
+ * @private
  *
  * @this Guide
  */
 
-Guide.prototype.button = function () {
+Guide.prototype._button = function () {
 
     var button = document.createElement("button"),
         buttonText = document.createTextNode("i"),
@@ -126,10 +128,12 @@ Guide.prototype.button = function () {
  *
  * @desc Generates the guide window and its dimensions, positioning, style.
  *
+ * @private
+ *
  * @this Guide
  */
 
-Guide.prototype.configureWindow = function () {
+Guide.prototype._configureWindow = function () {
 
     var template = "#" + this.raw.guideId,
         offset = $("#" + this.raw.canvasId).offset(),

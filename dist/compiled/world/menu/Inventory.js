@@ -93,7 +93,7 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
     this.messages = new Message(this.game, 14, messagePos);
     this.contextMenu = new ContextMenu(this);
 
-    this.onClick();
+    this._onClick();
 }
 
 /**
@@ -177,26 +177,28 @@ Inventory.prototype.addItems = function (items) {
  *
  * @desc Handles clicks and escape keydowns.
  *
+ * @private
+ *
  * @this Inventory
  *
  * @see{@link Mouse}
  */
 
-Inventory.prototype.onClick = function () {
+Inventory.prototype._onClick = function () {
     var _this3 = this;
 
     this.game.input.onDown.add(function () {
         if (_this3.mouse.switch) {
-            _this3.placeItem();
+            _this3._placeItem();
         } else {
-            _this3.click();
+            _this3._click();
         }
     });
 
     this.escape.onDown.add(function () {
         _this3.mouse.switch = false;
         _this3.mouse.reset();
-        _this3.reset();
+        _this3._reset();
     });
 };
 
@@ -205,10 +207,12 @@ Inventory.prototype.onClick = function () {
  *
  * @desc Alters Inventory items when they are clicked on.
  *
+ * @private
+ *
  * @this Inventory
  */
 
-Inventory.prototype.click = function () {
+Inventory.prototype._click = function () {
 
     var _this = this;
 
@@ -253,10 +257,12 @@ Inventory.prototype.click = function () {
  *
  * @desc Resets all Inventory sprites.
  *
+ * @private
+ *
  * @this Inventory
  */
 
-Inventory.prototype.reset = function () {
+Inventory.prototype._reset = function () {
 
     this.menuGroup.forEach(function (item) {
         item.input.useHandCursor = true;
@@ -274,10 +280,12 @@ Inventory.prototype.reset = function () {
  * @desc If <code>this.mouse</code> is in selected mode, on mousedown, add a sprite if that tile is discovered. Otherwise,
  * display a "you can't do that" message.
  *
+ * @private
+ *
  * @this Inventory
  */
 
-Inventory.prototype.placeItem = function () {
+Inventory.prototype._placeItem = function () {
 
     var tileSize = this.mouse.map.tileSize,
         x = this.mouse.threeD.x - this.mouse.threeD.x % tileSize,

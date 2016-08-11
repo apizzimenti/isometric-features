@@ -88,8 +88,6 @@ function Animal(game, scope, row, col, keys, group, map, species, scale) {
     this.sprite.tile = {};
 
     direction(this);
-
-    this.timedMovement();
 }
 
 /**
@@ -161,8 +159,8 @@ Animal.prototype.listen = function () {
         _this2.scope.$emit("scanned", { animal: _this2 });
     });
 
-    this.scope.$on("pathfind", function (e, data) {
-        _this2.pathfind(data.row, data.col);
+    this.scope.$on("_pathfind", function (e, data) {
+        _this2._pathfind(data.row, data.col);
     });
 };
 
@@ -171,13 +169,15 @@ Animal.prototype.listen = function () {
  *
  * @desc Generates a walkable path from the Animal's current location to the target location.
  *
+ * @private
+ *
  * @param itemRow {number} Target item's row.
  * @param itemCol {number} Target item's column.
  *
  * @this Animal
  */
 
-Animal.prototype.pathfind = function (itemRow, itemCol) {
+Animal.prototype._pathfind = function (itemRow, itemCol) {
     var _this3 = this;
 
     var e = new EasyStar.js(),
@@ -197,7 +197,7 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
             _this3.game.time.events.remove(_this3.loopedMovement);
             dirs = determineDirections(path);
             resetSprite(_this3, true);
-            _this3.followDirection(true, path, dirs);
+            _this3._followDirection(true, path, dirs);
         }
     });
 
@@ -209,6 +209,8 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
  *
  * @desc Recursive method for following a set of path instructions from EasyStar.js.
  *
+ * @private
+ *
  * @param begin {boolean} Is this the first iteration?
  * @param path {object[]} Array of coordinate objects.
  * @param dirs {number[]} Array of directions.
@@ -218,7 +220,7 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
  * @this Animal
  */
 
-Animal.prototype.followDirection = function (begin, path, dirs) {
+Animal.prototype._followDirection = function (begin, path, dirs) {
     var _this4 = this;
 
     var dim = this.map.tileSize,
@@ -239,7 +241,7 @@ Animal.prototype.followDirection = function (begin, path, dirs) {
             path.splice(0, 1);
             dirs.splice(0, 1);
 
-            _this4.followDirection(false, path, dirs);
+            _this4._followDirection(false, path, dirs);
         });
     } else if (!begin && !end) {
         var _tween;
@@ -252,7 +254,7 @@ Animal.prototype.followDirection = function (begin, path, dirs) {
             path.splice(0, 1);
             dirs.splice(0, 1);
 
-            _this4.followDirection(false, path, dirs);
+            _this4._followDirection(false, path, dirs);
         });
     } else if (!begin && end) {
         resetSprite(this, false);

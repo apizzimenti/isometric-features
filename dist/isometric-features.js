@@ -420,7 +420,7 @@ Debug.prototype.tiles = function (tiles) {
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Allows for future implementation of a button on/off switch for displaying debug info.
+ * @desc Allows for future implementation of a _button on/off switch for displaying debug info.
  *
  * @this Debug
  *
@@ -781,8 +781,6 @@ function Animal(game, scope, row, col, keys, group, map, species, scale) {
     this.sprite.tile = {};
 
     direction(this);
-
-    this.timedMovement();
 }
 
 /**
@@ -854,8 +852,8 @@ Animal.prototype.listen = function () {
         _this2.scope.$emit("scanned", { animal: _this2 });
     });
 
-    this.scope.$on("pathfind", function (e, data) {
-        _this2.pathfind(data.row, data.col);
+    this.scope.$on("_pathfind", function (e, data) {
+        _this2._pathfind(data.row, data.col);
     });
 };
 
@@ -864,13 +862,15 @@ Animal.prototype.listen = function () {
  *
  * @desc Generates a walkable path from the Animal's current location to the target location.
  *
+ * @private
+ *
  * @param itemRow {number} Target item's row.
  * @param itemCol {number} Target item's column.
  *
  * @this Animal
  */
 
-Animal.prototype.pathfind = function (itemRow, itemCol) {
+Animal.prototype._pathfind = function (itemRow, itemCol) {
     var _this3 = this;
 
     var e = new EasyStar.js(),
@@ -890,7 +890,7 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
             _this3.game.time.events.remove(_this3.loopedMovement);
             dirs = determineDirections(path);
             resetSprite(_this3, true);
-            _this3.followDirection(true, path, dirs);
+            _this3._followDirection(true, path, dirs);
         }
     });
 
@@ -902,6 +902,8 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
  *
  * @desc Recursive method for following a set of path instructions from EasyStar.js.
  *
+ * @private
+ *
  * @param begin {boolean} Is this the first iteration?
  * @param path {object[]} Array of coordinate objects.
  * @param dirs {number[]} Array of directions.
@@ -911,7 +913,7 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
  * @this Animal
  */
 
-Animal.prototype.followDirection = function (begin, path, dirs) {
+Animal.prototype._followDirection = function (begin, path, dirs) {
     var _this4 = this;
 
     var dim = this.map.tileSize,
@@ -932,7 +934,7 @@ Animal.prototype.followDirection = function (begin, path, dirs) {
             path.splice(0, 1);
             dirs.splice(0, 1);
 
-            _this4.followDirection(false, path, dirs);
+            _this4._followDirection(false, path, dirs);
         });
     } else if (!begin && !end) {
         var _tween;
@@ -945,7 +947,7 @@ Animal.prototype.followDirection = function (begin, path, dirs) {
             path.splice(0, 1);
             dirs.splice(0, 1);
 
-            _this4.followDirection(false, path, dirs);
+            _this4._followDirection(false, path, dirs);
         });
     } else if (!begin && end) {
         resetSprite(this, false);
@@ -1108,7 +1110,7 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
     var tile,
         tileArray = [],
         blockedArray = [],
-        tiles = preferredTiles || this.createTileMap(mapSize),
+        tiles = preferredTiles || this._createTileMap(mapSize),
         worldBounds = dim(tileSize, mapSize, 1),
         atlas_json_exists = game.cache.checkImageKey(tileSet),
         frame = null;
@@ -1121,7 +1123,7 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
     this.fog = fog;
 
     if (atlas_json_exists) {
-        this.generateMapKeys();
+        this._generateMapKeys();
         frame = globals.mapTileKey[3];
     } else {
         frame = null;
@@ -1183,12 +1185,14 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
  *
  * @desc Creates a size * size array with randomly assigned tiles. Can be modified to create a custom game map.
  *
+ * @private
+ *
  * @param size {number} Desired map size.
  *
  * @returns {sprite[]}
  */
 
-Map.prototype.createTileMap = function (size) {
+Map.prototype._createTileMap = function (size) {
 
     var tileMap = [];
 
@@ -1216,10 +1220,12 @@ Map.prototype.createTileMap = function (size) {
  *
  * @desc Generates global list of available tile keys.
  *
+ * @private
+ *
  * @this Map
  */
 
-Map.prototype.generateMapKeys = function () {
+Map.prototype._generateMapKeys = function () {
     var _iteratorNormalCompletion = true;
     var _didIteratorError = false;
     var _iteratorError = undefined;
@@ -1328,12 +1334,14 @@ function Player(game, row, col, keys, group, map, scale) {
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Tracks the 3x3 vision radius of the Player, and changes tiles within that radius to "discovered".
+ * @desc Tracks the 3x3 vision radius of the Player, and changes tiles within that radius to
+ *
+ * @private
  *
  * @this Player
  */
 
-Player.prototype.visionRadius = function () {
+Player.prototype._visionRadius = function () {
 
     var i,
         j,
@@ -1350,7 +1358,19 @@ Player.prototype.visionRadius = function () {
     }
 };
 
-Player.prototype.float = function () {
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @deprecated
+ *
+ * @desc Makes the player sprite float (as if defying gravity).
+ *
+ * @private
+ *
+ * @this Player
+ */
+
+Player.prototype._float = function () {
 
     this.sprite.isoZ = 5 + Math.sin(this.game.time.now * 0.005);
 };
@@ -1482,20 +1502,22 @@ function Guide(element, gameElement, styles) {
     $(document).ready(function () {
         _this.guideElement = $("#" + element);
 
-        _this.configureWindow();
-        _this.button();
+        _this._configureWindow();
+        _this._button();
     });
 }
 
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Generates a button on top of the game canvas for displaying help information.
+ * @desc Generates a _button on top of the game canvas for displaying help information.
+ *
+ * @private
  *
  * @this Guide
  */
 
-Guide.prototype.button = function () {
+Guide.prototype._button = function () {
 
     var button = document.createElement("button"),
         buttonText = document.createTextNode("i"),
@@ -1542,10 +1564,12 @@ Guide.prototype.button = function () {
  *
  * @desc Generates the guide window and its dimensions, positioning, style.
  *
+ * @private
+ *
  * @this Guide
  */
 
-Guide.prototype.configureWindow = function () {
+Guide.prototype._configureWindow = function () {
 
     var template = "#" + this.raw.guideId,
         offset = $("#" + this.raw.canvasId).offset(),
@@ -1662,7 +1686,7 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
     this.messages = new Message(this.game, 14, messagePos);
     this.contextMenu = new ContextMenu(this);
 
-    this.onClick();
+    this._onClick();
 }
 
 /**
@@ -1746,26 +1770,28 @@ Inventory.prototype.addItems = function (items) {
  *
  * @desc Handles clicks and escape keydowns.
  *
+ * @private
+ *
  * @this Inventory
  *
  * @see{@link Mouse}
  */
 
-Inventory.prototype.onClick = function () {
+Inventory.prototype._onClick = function () {
     var _this3 = this;
 
     this.game.input.onDown.add(function () {
         if (_this3.mouse.switch) {
-            _this3.placeItem();
+            _this3._placeItem();
         } else {
-            _this3.click();
+            _this3._click();
         }
     });
 
     this.escape.onDown.add(function () {
         _this3.mouse.switch = false;
         _this3.mouse.reset();
-        _this3.reset();
+        _this3._reset();
     });
 };
 
@@ -1774,10 +1800,12 @@ Inventory.prototype.onClick = function () {
  *
  * @desc Alters Inventory items when they are clicked on.
  *
+ * @private
+ *
  * @this Inventory
  */
 
-Inventory.prototype.click = function () {
+Inventory.prototype._click = function () {
 
     var _this = this;
 
@@ -1822,10 +1850,12 @@ Inventory.prototype.click = function () {
  *
  * @desc Resets all Inventory sprites.
  *
+ * @private
+ *
  * @this Inventory
  */
 
-Inventory.prototype.reset = function () {
+Inventory.prototype._reset = function () {
 
     this.menuGroup.forEach(function (item) {
         item.input.useHandCursor = true;
@@ -1843,10 +1873,12 @@ Inventory.prototype.reset = function () {
  * @desc If <code>this.mouse</code> is in selected mode, on mousedown, add a sprite if that tile is discovered. Otherwise,
  * display a "you can't do that" message.
  *
+ * @private
+ *
  * @this Inventory
  */
 
-Inventory.prototype.placeItem = function () {
+Inventory.prototype._placeItem = function () {
 
     var tileSize = this.mouse.map.tileSize,
         x = this.mouse.threeD.x - this.mouse.threeD.x % tileSize,
@@ -1876,6 +1908,162 @@ Inventory.prototype.placeItem = function () {
     } else {
         this.messages.add(message);
     }
+};
+
+"use strict";
+
+(function () {})();
+/**
+ * Created by apizzimenti on 7/15/16.
+ */
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc The Message structure handles all the popup messages in the game.
+ *
+ * @param game {object} Current Phaser game instance.
+ * @param size {number} Font size.
+ * @param [loc="bottom_left"] {string} Preferred location for messages: can be <code>"bottom_left"</code>, <code>"bottom_right"</code>,
+ * <code>"top_left"</code>, or <code>"top_right"</code>.
+ *
+ * @property game {object} Phaser game instance.
+ * @property y {number} Height of the game.
+ * @property message {string | string[]} Message to be displayed.
+ * @property fontSize {number} Font size.
+ * @property style {object} Message styling.
+ * @property style.font {string} Font style.
+ * @property style.fill {string} Hexadecimal color value.
+ * @property alert {Signal} Signal.
+ *
+ * @class {object} Message
+ * @this Message
+ * @constructor
+ */
+
+function Message(game, size, loc) {
+    var _this = this;
+
+    this.game = game;
+    this.y = this.game.height;
+    this.message = "";
+    this.loc = loc;
+    this.fontSize = size;
+    this.style = {
+        font: size + "px Courier",
+        fill: "#FFFFFF"
+    };
+
+    this.alert = new Phaser.Signal();
+
+    this.alert.add(function () {
+        _this._display();
+    });
+}
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Adds the provided message to the queue.
+ *
+ * @param message {string} Message to be added to the queue.
+ *
+ * @this Message
+ */
+
+Message.prototype.add = function (message) {
+    this.message = message;
+    this.alert.dispatch();
+};
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Displays the message on the screen for five seconds, with in and out tweens.
+ *
+ * @private
+ *
+ * @this Message
+ *
+ * @todo get messages queue to work
+ */
+
+Message.prototype._display = function () {
+    var _this2 = this;
+
+    var str = this._format(this.message);
+
+    this.text = this.game.add.text(str.x, str.y, str.msg, this.style);
+
+    this.text.alpha = 0;
+    this.text.fixedToCamera = true;
+
+    this.game.add.tween(this.text).to({ alpha: 1 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+
+    this.game.time.events.add(Phaser.Timer.SECOND * 5, function () {
+        _this2.game.add.tween(_this2.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+    });
+};
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Formats messages so they are 60 characters wide.
+ *
+ * @private
+ *
+ * @param message {string} Message to be formatted.
+ *
+ * @returns {{x: number, y: number, msg: string}} Width and height of Phaser message area; formatted string.
+ *
+ * @todo Format according to where words are, not just the 60th character.
+ */
+
+Message.prototype._format = function (message) {
+
+    var last = 0,
+        strs = [],
+        dist = message.length % 60 ? message.length - message.length % 60 : 0,
+        vals = {};
+
+    for (var i = 0; i < message.length; i++) {
+
+        if (!(i % 60) && i !== 0) {
+            strs.push(message.slice(last, i) + "\n");
+            last = i;
+        } else if (dist === 0 && i === message.length - 1) {
+            strs.push(message.slice(last, message.length));
+        } else if (i > dist && dist !== 0) {
+            strs.push(message.slice(last, message.length));
+            break;
+        }
+    }
+
+    switch (this.loc) {
+
+        case "bottom_left":default:
+            vals.x = 10;
+            vals.y = this.y - strs.length * this.fontSize * 1.8;
+            break;
+
+        case "top_left":
+            vals.x = 10;
+            vals.y = strs.length * (this.fontSize * 1.8);
+            break;
+
+        case "top_right":
+            vals.x = this.game.width - 540;
+            vals.y = 10;
+            break;
+
+        case "bottom_right":
+            vals.x = this.game.width - 540;
+            vals.y = this.y - strs.length * this.fontSize * 1.8;
+            break;
+    }
+
+    vals.msg = strs.join(" ");
+    return vals;
 };
 
 "use strict";
