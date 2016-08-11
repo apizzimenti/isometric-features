@@ -87,8 +87,8 @@ var isogame = function (scope, injector) {
             characters.enableBody = true;
             characters.physicsBodyType = Phaser.Plugin.Isometric.ISOARCADE;
 
-            // create a new map!
-            map = new Map(game, groundTiles, "tileset", tileSize, 25);
+            // create a new map with fog of war on, a randomly generated tilemap.
+            map = new Map(game, groundTiles, "tileset", tileSize, 25, null, true);
 
             // load the sprites (Animals, Player(s)) and assign them to their containers
             sprites = load.sprites(map, characters);
@@ -135,7 +135,7 @@ var isogame = function (scope, injector) {
         update: function () {
 
             // collision physics
-            game.physics.isoArcade.collide(characters);
+            // game.physics.isoArcade.collide(characters);
             game.iso.simpleSort(characters);
 
             // keep track of the Player's direction, keymapping, and restrict the vision radius

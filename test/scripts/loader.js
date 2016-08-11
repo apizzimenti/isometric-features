@@ -134,7 +134,7 @@ function Loader (relpath, game, scope) {
 
         // load Player sprite
 
-        player = new Player(game, 7, 7, this.textures.astronaut, group, map, null);
+        player = new Player(game, 7, 7, this.textures.astronaut, group, map);
 
         // load Animal sprites
 
