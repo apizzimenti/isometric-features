@@ -16,6 +16,9 @@
  * @param group {object} Phaser group.
  * @param map {Map} This game's Map object.
  *
+ * @since 1.0.8
+ * @param [scale=1] {number | number[]} The desired sprite scale factor. Can be of the format x, [x], or [x, y].
+ *
  * @property game {object} Current game instance.
  * @property sprite {sprite} Phaser isoSprite.
  *
@@ -41,8 +44,8 @@
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function Player(game, row, col, keys, group, map) {
-    var _sprite$anchor;
+function Player(game, row, col, keys, group, map, scale) {
+    var _sprite$anchor, _sprite$scale;
 
     this.type = "player";
     this.map = map;
@@ -53,10 +56,17 @@ function Player(game, row, col, keys, group, map) {
     this.game = game;
     this.keys = keys;
 
+    if (scale) {
+        this.scale = Array.isArray(scale) ? scale : [scale];
+    } else {
+        this.scale = [1];
+    }
+
     // initialize the isosprite and set the game's anchor
     this.sprite = this.game.add.isoSprite(x, y, 0, keys[0], null, group);
     (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(globals.anchor));
     this.sprite.body.collideWorldBounds = true;
+    (_sprite$scale = this.sprite.scale).setTo.apply(_sprite$scale, _toConsumableArray(this.scale));
 
     // camera follows this sprite
     this.game.camera.follow(this.sprite);

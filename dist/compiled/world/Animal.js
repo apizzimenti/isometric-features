@@ -16,7 +16,10 @@
  * @param keys {string[]} Cached Phaser textures or images.
  * @param group {object} Phaser group.
  * @param map {Map} Game's Map object.
- * @param species {string} This animal's species.
+ * @param [species=sprite.key] {string} This animal's species.
+ *
+ * @since 1.0.8
+ * @param [scale=1] {number | number[]} The desired sprite scale factor. Can be of the format x, [x], or [x, y].
  *
  * @property game {object} Phaser game instance.
  * @property scope {object} Angular scope.
@@ -35,7 +38,8 @@
  * @property direction {number} Current direction of travel.
  * @property scanned {boolean} Has this Animal been scanned?
  * @property scan {object} Phaser Signal that, on dispatch, is immediately destroyed.
- * @property [species="none"] {string} This animal's species.
+ * @property species {string} This animal's species.
+ * @property sprite.scale {number | number[]} The sprite's scale factor.
  *
  * @class {object} Animal
  * @this Animal
@@ -44,15 +48,22 @@
  * @see Player
  * @see direction
  * @see globals
+ * @see Map
  */
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function Animal(game, scope, row, col, keys, group, map, species) {
-    var _sprite$anchor;
+function Animal(game, scope, row, col, keys, group, map, species, scale) {
+    var _sprite$anchor, _sprite$scale;
 
     this.type = "animal";
-    this.species = species || "none";
+    this.species = species || keys[0];
+
+    if (scale) {
+        this.scale = Array.isArray(scale) ? scale : [scale];
+    } else {
+        this.scale = [1];
+    }
 
     this.game = game;
     this.scope = scope;
@@ -67,7 +78,8 @@ function Animal(game, scope, row, col, keys, group, map, species) {
     this.game.physics.isoArcade.enable(this.sprite);
     this.sprite.enableBody = true;
     this.sprite.body.collideWorldBounds = true;
-    this.sprite.visible = false;
+    this.sprite.visible = !map.fog;
+    (_sprite$scale = this.sprite.scale).setTo.apply(_sprite$scale, _toConsumableArray(this.scale));
 
     this.scanned = false;
     this.scan = new Phaser.Signal();
@@ -130,7 +142,6 @@ Animal.prototype.timedMovement = function () {
     this.loopedMovement = this.game.time.events.loop(Phaser.Timer.SECOND * 3 + this.rand, function () {
         dir = Math.floor(Math.random() * 4);
         _this.rand = Math.random() * 3;
-
         manipulateDirection(_this, dir);
     });
 };
@@ -185,6 +196,7 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
         } else {
             _this3.game.time.events.remove(_this3.loopedMovement);
             dirs = determineDirections(path);
+            resetSprite(_this3, true);
             _this3.followDirection(true, path, dirs);
         }
     });
@@ -243,6 +255,7 @@ Animal.prototype.followDirection = function (begin, path, dirs) {
             _this4.followDirection(false, path, dirs);
         });
     } else if (!begin && end) {
+        resetSprite(this, false);
         this.timedMovement();
     }
 };

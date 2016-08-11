@@ -15,7 +15,7 @@
 
 var globals = {
     anchor: [0.5, 0],
-    mapTileKey: ["grass", "sand", "sandstone"],
+    mapTileKey: [],
     tween: [1000, Phaser.Easing.Linear.None, true, 0, 0, false]
 };
 

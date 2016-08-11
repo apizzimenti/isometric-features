@@ -250,6 +250,24 @@ function determineDirections(path) {
     }
 }
 
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Resets a sprite.
+ *
+ * @param sprite {Animal | Player} The sprite to be reset.
+ * @param body {boolean} Will the sprite's body move?
+ */
+
+function resetSprite(sprite, body) {
+    var s = sprite.sprite;
+    s.body.velocity.x = 0;
+    s.body.velocity.y = 0;
+    s.direction = 0;
+
+    s.body.moves = !body;
+}
+
 "use strict";
 
 /**
@@ -430,7 +448,7 @@ Debug.prototype.switch = function () {
 
 var globals = {
     anchor: [0.5, 0],
-    mapTileKey: ["grass", "sand", "sandstone"],
+    mapTileKey: [],
     tween: [1000, Phaser.Easing.Linear.None, true, 0, 0, false]
 };
 
@@ -691,7 +709,10 @@ function keymapTrack(Player, context) {
  * @param keys {string[]} Cached Phaser textures or images.
  * @param group {object} Phaser group.
  * @param map {Map} Game's Map object.
- * @param species {string} This animal's species.
+ * @param [species=sprite.key] {string} This animal's species.
+ *
+ * @since 1.0.8
+ * @param [scale=1] {number | number[]} The desired sprite scale factor. Can be of the format x, [x], or [x, y].
  *
  * @property game {object} Phaser game instance.
  * @property scope {object} Angular scope.
@@ -710,7 +731,8 @@ function keymapTrack(Player, context) {
  * @property direction {number} Current direction of travel.
  * @property scanned {boolean} Has this Animal been scanned?
  * @property scan {object} Phaser Signal that, on dispatch, is immediately destroyed.
- * @property [species="none"] {string} This animal's species.
+ * @property species {string} This animal's species.
+ * @property sprite.scale {number | number[]} The sprite's scale factor.
  *
  * @class {object} Animal
  * @this Animal
@@ -719,15 +741,22 @@ function keymapTrack(Player, context) {
  * @see Player
  * @see direction
  * @see globals
+ * @see Map
  */
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function Animal(game, scope, row, col, keys, group, map, species) {
-    var _sprite$anchor;
+function Animal(game, scope, row, col, keys, group, map, species, scale) {
+    var _sprite$anchor, _sprite$scale;
 
     this.type = "animal";
-    this.species = species || "none";
+    this.species = species || keys[0];
+
+    if (scale) {
+        this.scale = Array.isArray(scale) ? scale : [scale];
+    } else {
+        this.scale = [1];
+    }
 
     this.game = game;
     this.scope = scope;
@@ -742,7 +771,8 @@ function Animal(game, scope, row, col, keys, group, map, species) {
     this.game.physics.isoArcade.enable(this.sprite);
     this.sprite.enableBody = true;
     this.sprite.body.collideWorldBounds = true;
-    this.sprite.visible = false;
+    this.sprite.visible = !map.fog;
+    (_sprite$scale = this.sprite.scale).setTo.apply(_sprite$scale, _toConsumableArray(this.scale));
 
     this.scanned = false;
     this.scan = new Phaser.Signal();
@@ -805,7 +835,6 @@ Animal.prototype.timedMovement = function () {
     this.loopedMovement = this.game.time.events.loop(Phaser.Timer.SECOND * 3 + this.rand, function () {
         dir = Math.floor(Math.random() * 4);
         _this.rand = Math.random() * 3;
-
         manipulateDirection(_this, dir);
     });
 };
@@ -860,6 +889,7 @@ Animal.prototype.pathfind = function (itemRow, itemCol) {
         } else {
             _this3.game.time.events.remove(_this3.loopedMovement);
             dirs = determineDirections(path);
+            resetSprite(_this3, true);
             _this3.followDirection(true, path, dirs);
         }
     });
@@ -918,6 +948,7 @@ Animal.prototype.followDirection = function (begin, path, dirs) {
             _this4.followDirection(false, path, dirs);
         });
     } else if (!begin && end) {
+        resetSprite(this, false);
         this.timedMovement();
     }
 };
@@ -1336,10 +1367,11 @@ Item.prototype.threeDInitialize = function () {
  *
  * @param game {object} Current game instance.
  * @param group {object} Phaser group.
- * @param tileSet Tileset and corresponding JSON.
+ * @param tileSet Tileset and corresponding JSON or tile key.
  * @param tileSize {number} Size of an individual tile.
  * @param mapSize {number} Desired map size.
  * @param [preferredTiles=object[]] {object[]} Array of tiles; by default, the Map class creates this for you.
+ * @param [fog=true] {boolean} Is the fog of war on or off?
  *
  * @property game {object} Current game instance.
  * @property tileSet Tileset and corresponding JSON.
@@ -1348,25 +1380,36 @@ Item.prototype.threeDInitialize = function () {
  * @property tileMap {sprite[]} Array of tile sprites.
  * @property group {object} Phaser game group.
  * @property blocked {number[]} Array of numbers indicating which tiles are blocked (1) and which aren't (0).
+ * @property fog {boolean} Is the fog of war on or off?
  *
  * @class {object} Map
  * @this Map
  * @constructor
  */
 
-function Map(game, group, tileSet, tileSize, mapSize, preferredTiles) {
+function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
 
     var tile,
         tileArray = [],
         blockedArray = [],
         tiles = preferredTiles || this.createTileMap(mapSize),
-        worldBounds = dim(tileSize, mapSize, 1);
+        worldBounds = dim(tileSize, mapSize, 1),
+        atlas_json_exists = game.cache.checkImageKey(tileSet),
+        frame = null;
 
     this.game = game;
     this.tileSet = tileSet;
     this.tileSize = tileSize;
     this.mapSize = mapSize;
     this.group = group;
+    this.fog = fog;
+
+    if (atlas_json_exists) {
+        this.generateMapKeys();
+        frame = globals.mapTileKey[3];
+    } else {
+        frame = null;
+    }
 
     for (var row = 0; row < tiles.length; row++) {
 
@@ -1375,19 +1418,19 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles) {
 
         for (var col = 0; col < tiles[0].length; col++) {
 
-            tile = this.game.add.isoSprite(row * this.tileSize, col * this.tileSize, 0, this.tileSet, globals.mapTileKey[tiles[row][col]], this.group);
+            tile = this.game.add.isoSprite(row * this.tileSize, col * this.tileSize, 0, this.tileSet, frame, this.group);
 
             if (col > tiles.length - 2 || row < 1 || row > tiles.length - 2 || col < 1) {
-                tile.tint = 0x571F57;
+                tile.tint = this.fog ? 0x571F57 : 0xFFFFFF;
                 tile.blocked = true;
                 blockedArray[row].push(0);
             } else {
                 tile.blocked = false;
-                tile.tint = 0x571F57;
+                tile.tint = this.fog ? 0x571F57 : 0xFFFFFF;
                 blockedArray[row].push(1);
             }
 
-            tile.discovered = false;
+            tile.discovered = this.fog ? false : true;
             tile.type = "tile";
 
             tile.anchor.set(0.5, 1);
@@ -1450,6 +1493,41 @@ Map.prototype.createTileMap = function (size) {
     }
 
     return tileMap;
+};
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Generates global list of available tile keys.
+ *
+ * @this Map
+ */
+
+Map.prototype.generateMapKeys = function () {
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+        for (var _iterator = this.game.cache._cache.image[this.tileSet].frameData._frames[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var frame = _step.value;
+
+            globals.mapTileKey.push(frame.name);
+        }
+    } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+            }
+        } finally {
+            if (_didIteratorError) {
+                throw _iteratorError;
+            }
+        }
+    }
 };
 
 "use strict";
@@ -2141,6 +2219,9 @@ Message.prototype.format = function (message) {
  * @param group {object} Phaser group.
  * @param map {Map} This game's Map object.
  *
+ * @since 1.0.8
+ * @param [scale=1] {number | number[]} The desired sprite scale factor. Can be of the format x, [x], or [x, y].
+ *
  * @property game {object} Current game instance.
  * @property sprite {sprite} Phaser isoSprite.
  *
@@ -2166,8 +2247,8 @@ Message.prototype.format = function (message) {
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function Player(game, row, col, keys, group, map) {
-    var _sprite$anchor;
+function Player(game, row, col, keys, group, map, scale) {
+    var _sprite$anchor, _sprite$scale;
 
     this.type = "player";
     this.map = map;
@@ -2178,10 +2259,17 @@ function Player(game, row, col, keys, group, map) {
     this.game = game;
     this.keys = keys;
 
+    if (scale) {
+        this.scale = Array.isArray(scale) ? scale : [scale];
+    } else {
+        this.scale = [1];
+    }
+
     // initialize the isosprite and set the game's anchor
     this.sprite = this.game.add.isoSprite(x, y, 0, keys[0], null, group);
     (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(globals.anchor));
     this.sprite.body.collideWorldBounds = true;
+    (_sprite$scale = this.sprite.scale).setTo.apply(_sprite$scale, _toConsumableArray(this.scale));
 
     // camera follows this sprite
     this.game.camera.follow(this.sprite);
