@@ -141,7 +141,7 @@ var isogame = function (scope, injector) {
             // keep track of the Player's direction, keymapping, and restrict the vision radius
             direction(player);
             keymapTrack(player, this);
-            player.visionRadius();
+            player._visionRadius();
 
             // keep track of each Animal's direction
             creatures.forEach((creature) => {
