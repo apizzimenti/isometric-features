@@ -74,7 +74,7 @@ module.exports = function (grunt) {
     
         jsdoc: {
             dist: {
-                src: ["lib/**/*.js", "lib/README.md"],
+                src: ["lib/**/**/*.js", "lib/README.md"],
                 options: {
                     destination: "../isometric-features-docs/",
                     template: "node_modules/minami"
