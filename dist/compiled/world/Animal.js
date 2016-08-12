@@ -159,7 +159,7 @@ Animal.prototype.listen = function () {
         _this2.scope.$emit("scanned", { animal: _this2 });
     });
 
-    this.scope.$on("_pathfind", function (e, data) {
+    this.scope.$on("pathfind", function (e, data) {
         _this2._pathfind(data.row, data.col);
     });
 };

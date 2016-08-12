@@ -1,4 +1,4 @@
-/*! iso-game-features - v0.0.1 - 2016-08-11
+/*! iso-game-features - v0.0.1 - 2016-08-12
 * Copyright (c) 2016 ; Licensed MIT */
 "use strict";
 
@@ -852,7 +852,7 @@ Animal.prototype.listen = function () {
         _this2.scope.$emit("scanned", { animal: _this2 });
     });
 
-    this.scope.$on("_pathfind", function (e, data) {
+    this.scope.$on("pathfind", function (e, data) {
         _this2._pathfind(data.row, data.col);
     });
 };
@@ -1331,6 +1331,11 @@ function Player(game, row, col, keys, group, map, scale) {
     direction(this);
 }
 
+Player.prototype.addIntro = function (intro) {
+
+    this.intro = intro;
+};
+
 /**
  * @author Anthony Pizzimenti
  *
@@ -1341,7 +1346,7 @@ function Player(game, row, col, keys, group, map, scale) {
  * @this Player
  */
 
-Player.prototype._visionRadius = function () {
+Player.prototype.visionRadius = function () {
 
     var i,
         j,

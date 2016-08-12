@@ -81,6 +81,11 @@ function Player(game, row, col, keys, group, map, scale) {
     direction(this);
 }
 
+Player.prototype.addIntro = function (intro) {
+
+    this.intro = intro;
+};
+
 /**
  * @author Anthony Pizzimenti
  *
@@ -91,7 +96,7 @@ function Player(game, row, col, keys, group, map, scale) {
  * @this Player
  */
 
-Player.prototype._visionRadius = function () {
+Player.prototype.visionRadius = function () {
 
     var i,
         j,
