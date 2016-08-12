@@ -161,7 +161,6 @@ function Loader (relpath, game, scope) {
             }
         }
         
-        // time animal movement
         creatures.forEach(function (creature) {
             creature.timedMovement();
         });
