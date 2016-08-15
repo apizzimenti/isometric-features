@@ -136,20 +136,22 @@ function Loader (relpath, game, scope) {
             },
             tween = {
                 properties: {
-                    isoZ: 0
+                    isoZ: 24
                 },
                 duration: 3000,
-                easing: Phaser.Easing.Linear.None
+                easing: Phaser.Easing.Quintic.Out
             };
 
         // load Player sprite
+        
         /*
         since the Player sprite needs an intro animation, I pass false into the auto parameter
         and call Player.addIntro(), then Player.create().
          */
 
-        player = new Player(game, 7, 7, this.textures.astronaut, group, map, null, true);
-
+        player = new Player(game, 7, 7, this.textures.astronaut, group, map, null, false);
+        player.addIntro(init, tween);
+        player.create();
         // load Animal sprites
 
         for (var i = 0; i < 6; i++) {
