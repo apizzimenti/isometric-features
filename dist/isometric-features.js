@@ -1443,8 +1443,7 @@ Player.prototype._instantiate = function () {
  *
  * var tween = {
  *     properties: {
- *         isoZ: 0,
- *         isoX: 10
+ *         isoZ: 24
  *     },
  *     duration: 2000,
  *     easing: Phaser.Easing.Bounce
