@@ -130,11 +130,25 @@ function Loader (relpath, game, scope) {
             creatures = [],
             game = this.game,
             randR,
-            randC;
+            randC,
+            init = {
+                isoZ: 1000
+            },
+            tween = {
+                properties: {
+                    isoZ: 0
+                },
+                duration: 3000,
+                easing: Phaser.Easing.Linear.None
+            };
 
         // load Player sprite
+        /*
+        since the Player sprite needs an intro animation, I pass false into the auto parameter
+        and call Player.addIntro(), then Player.create().
+         */
 
-        player = new Player(game, 7, 7, this.textures.astronaut, group, map);
+        player = new Player(game, 7, 7, this.textures.astronaut, group, map, null, true);
 
         // load Animal sprites
 

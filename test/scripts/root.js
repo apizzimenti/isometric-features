@@ -11,8 +11,8 @@ var isogame = function (scope, injector) {
     the game has a 1024x768 window. Conformity!
      */
 
-    var orig_width = window.innerWidth,
-        orig_height = window.innerHeight,
+    var orig_width = window.innerWidth / (1.68 * 0.5),
+        orig_height = window.innerHeight / (1.68 * 0.5),
         width = 1024,
         height = 768,
         game = new Phaser.Game(width, height, Phaser.CANVAS, "gameCanvas", null, true, false),
@@ -52,21 +52,18 @@ var isogame = function (scope, injector) {
             set the world bounds; these aren't the bounds of the physics system, but are larger than the game window
             so the camera follows the Player
             */
-            game.world.setBounds(0, 0, 2400, 2400);
+    
+            this.game.world.setBounds(0, 0, 2400, 2400);
 
             // add the isometric plugin
             game.plugins.add(new Phaser.Plugin.Isometric(game));
 
             // load assets (images, tilemap, textures, etc)
-
-            /**
-             * @see Loader
-             */
             load.assets();
 
             // start the physics system and set the anchor for the game
             game.physics.startSystem(Phaser.Plugin.Isometric.ISOARCADE);
-            game.iso.anchor.setTo(...globals.anchor);
+            game.iso.anchor.setTo(...Globals.anchor);
         },
 
         create: function () {
@@ -88,7 +85,7 @@ var isogame = function (scope, injector) {
             characters.physicsBodyType = Phaser.Plugin.Isometric.ISOARCADE;
 
             // create a new map with fog of war on, a randomly generated tilemap.
-            map = new Map(game, groundTiles, "tileset", tileSize, 25, null, true);
+            map = new Map(game, groundTiles, "tileset", tileSize, 25, null, false);
 
             // load the sprites (Animals, Player(s)) and assign them to their containers
             sprites = load.sprites(map, characters);
