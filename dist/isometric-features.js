@@ -760,7 +760,6 @@ function keymapTrack(Player, context) {
  * @property scanned {boolean} Has this Animal been scanned?
  * @property scan {object} Phaser Signal that, on dispatch, is immediately destroyed.
  * @property species {string} This animal's species.
- *
  * @property auto {boolean} Is this sprite loaded automatically?
  *
  * @class {object} Animal
@@ -1461,12 +1460,13 @@ Player.prototype._instantiate = function () {
 Player.prototype.addIntro = function (preTween, tweenParameters, postTween) {
     var _game$add$tween;
 
-    var params = [];
+    var params = [],
+        tP = tweenParameters;
 
     if (Globals.paramNotExist(preTween, "object")) {
-        throw new TypeError("preTween parameter is not of type object");
-    } else if (Globals.paramNotExist(tweenParameters, "object")) {
-        throw new TypeError("tweenParameters parameter is not of type object");
+        throw new TypeError("preTween is not of type object");
+    } else if (Globals.paramNotExist(tP, "object")) {
+        throw new TypeError("tweenParameters is not of type object");
     } else if (postTween) {
 
         if (Globals.paramNotExist(postTween, "object")) {
@@ -1490,10 +1490,16 @@ Player.prototype.addIntro = function (preTween, tweenParameters, postTween) {
         }
     }
 
-    for (var parameter in tweenParameters) {
-        if (tweenParameters.hasOwnProperty(parameter)) {
-            params.push(tweenParameters[parameter]);
-        }
+    if (!tP.hasOwnProperty("properties")) {
+        throw new ReferenceError("tweenParameters has no defined 'properties' property");
+    } else if (!tP.hasOwnProperty("easing")) {
+        throw new ReferenceError("tweenParameters has no defined 'easing' property");
+    } else if (!tP.hasOwnProperty("duration")) {
+        throw new ReferenceError("tweenParameters has no defined 'duration' property");
+    } else {
+        params[0] = tP.properties;
+        params[1] = tP.duration;
+        params[2] = tP.easing;
     }
 
     this.intro = (_game$add$tween = this.game.add.tween(this.sprite)).to.apply(_game$add$tween, params.concat([false, 0, 0, false]));

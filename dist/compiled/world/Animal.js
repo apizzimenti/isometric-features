@@ -39,7 +39,6 @@
  * @property scanned {boolean} Has this Animal been scanned?
  * @property scan {object} Phaser Signal that, on dispatch, is immediately destroyed.
  * @property species {string} This animal's species.
- *
  * @property auto {boolean} Is this sprite loaded automatically?
  *
  * @class {object} Animal
