@@ -17,13 +17,12 @@
  * @param group {object} Phaser group.
  * @param map {Map} Game's Map object.
  * @param [species=sprite.key] {string} This animal's species.
- *
- * @since 1.0.8
  * @param [scale=1] {number | number[]} The desired sprite scale factor. Can be of the format x, [x], or [x, y].
+ * @param [auto=true] {boolean} Do you want this sprite to be loaded automatically?
  *
  * @property game {object} Phaser game instance.
  * @property scope {object} Angular scope.
- * @property sprite {sprite} Phaser isoSprite.
+ * @property sprite {object} Phaser isoSprite.
  * 
  * @property sprite.tile {object} Empty object that, on direction initialization, will be populated.
  * @property sprite.tile.center {sprite} Center tile.
@@ -31,6 +30,7 @@
  * @property sprite.tile.left {sprite} Tile to the relative left.
  * @property sprite.tile.bottom {sprite} Tile to the relative bottom.
  * @property sprite.tile.right {sprite} Tile to the relative right.
+ * @property sprite.scale {number | number[]} The sprite's scale factor.
  * 
  * @property map {Map} This sprite's Map object.
  * @property row {number} Current tile row.
@@ -39,7 +39,8 @@
  * @property scanned {boolean} Has this Animal been scanned?
  * @property scan {object} Phaser Signal that, on dispatch, is immediately destroyed.
  * @property species {string} This animal's species.
- * @property sprite.scale {number | number[]} The sprite's scale factor.
+ *
+ * @property auto {boolean} Is this sprite loaded automatically?
  *
  * @class {object} Animal
  * @this Animal
@@ -47,13 +48,13 @@
  * 
  * @see Player
  * @see direction
- * @see globals
+ * @see Globals
  * @see Map
  */
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function Animal(game, scope, row, col, keys, group, map, species, scale) {
+function Animal(game, scope, row, col, keys, group, map, species, scale, auto) {
     var _sprite$anchor, _sprite$scale;
 
     this.type = "animal";
@@ -65,6 +66,12 @@ function Animal(game, scope, row, col, keys, group, map, species, scale) {
         this.scale = [1];
     }
 
+    if (auto !== undefined) {
+        this.auto = auto;
+    } else {
+        this.auto = true;
+    }
+
     this.game = game;
     this.scope = scope;
     this.keys = keys;
@@ -74,18 +81,17 @@ function Animal(game, scope, row, col, keys, group, map, species, scale) {
         y = col * map.tileSize;
 
     this.sprite = this.game.add.isoSprite(x, y, 0, keys[0], null, group);
-    (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(globals.anchor));
+    this.sprite.tile = {};
+    (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(Globals.anchor));
     this.game.physics.isoArcade.enable(this.sprite);
     this.sprite.enableBody = true;
     this.sprite.body.collideWorldBounds = true;
-    this.sprite.visible = !map.fog;
+    this.sprite.visible = !this.map.fog;
     (_sprite$scale = this.sprite.scale).setTo.apply(_sprite$scale, _toConsumableArray(this.scale));
 
     this.scanned = false;
     this.scan = new Phaser.Signal();
     this.listen();
-
-    this.sprite.tile = {};
 
     direction(this);
 }
@@ -102,22 +108,27 @@ function Animal(game, scope, row, col, keys, group, map, species, scale) {
 
 Animal.prototype.isVisible = function (Player) {
 
-    var pRow = Player.row,
-        pCol = Player.col,
-        row = this.sprite.row,
-        col = this.sprite.col,
-        inRow = row >= pRow - 1 && row <= pRow + 1,
-        inCol = col >= pCol - 1 && col <= pCol + 1;
+    if (Player.auto) {
 
-    if (inRow && inCol) {
-        this.sprite.visible = true;
+        var pRow = Player.row,
+            pCol = Player.col,
+            row = this.sprite.row,
+            col = this.sprite.col,
+            inRow = row >= pRow - 1 && row <= pRow + 1,
+            inCol = col >= pCol - 1 && col <= pCol + 1;
+
+        if (inRow && inCol) {
+            this.sprite.visible = true;
+        }
+
+        this.sprite.tile.center.discovered ? this.sprite.visible = true : this.sprite.visible = false;
     }
-
-    this.sprite.tile.center.discovered ? this.sprite.visible = true : this.sprite.visible = false;
 };
 
+Animal.prototype._instantiate = function () {};
+
 /**
- * @author Anthony Pizzimentigid
+ * @author Anthony Pizzimenti
  *
  * @desc Changes the target sprite's direction at intervals of 3 + <code>n</code> seconds, where <code>n</code> is a
  * random floating point value such that 0 < <code>n</code> < 3 and is changed at every event firing.
@@ -234,7 +245,7 @@ Animal.prototype._followDirection = function (begin, path, dirs) {
     if (begin) {
         var _game$add$tween;
 
-        this.sprite.tween = (_game$add$tween = this.game.add.tween(this.sprite)).to.apply(_game$add$tween, [{ isoX: x, isoY: y }].concat(_toConsumableArray(globals.tween)));
+        this.sprite.tween = (_game$add$tween = this.game.add.tween(this.sprite)).to.apply(_game$add$tween, [{ isoX: x, isoY: y }].concat(_toConsumableArray(Globals.tween)));
 
         this.sprite.tween.onComplete.add(function () {
             _this4.sprite.direction = dirs[0];
@@ -247,7 +258,7 @@ Animal.prototype._followDirection = function (begin, path, dirs) {
         var _tween;
 
         tween = this.game.add.tween(this.sprite);
-        this.sprite.tween.chain((_tween = tween).to.apply(_tween, [{ isoX: x, isoY: y }].concat(_toConsumableArray(globals.tween))));
+        this.sprite.tween.chain((_tween = tween).to.apply(_tween, [{ isoX: x, isoY: y }].concat(_toConsumableArray(Globals.tween))));
 
         tween.onComplete.add(function () {
             _this4.sprite.direction = dirs[0];

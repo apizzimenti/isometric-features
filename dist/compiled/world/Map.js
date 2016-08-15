@@ -50,7 +50,7 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
 
     if (atlas_json_exists) {
         this._generateMapKeys();
-        frame = globals.mapTileKey[3];
+        frame = Globals.mapTileKey[3];
     } else {
         frame = null;
     }
@@ -160,7 +160,7 @@ Map.prototype._generateMapKeys = function () {
         for (var _iterator = this.game.cache._cache.image[this.tileSet].frameData._frames[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
             var frame = _step.value;
 
-            globals.mapTileKey.push(frame.name);
+            Globals.mapTileKey.push(frame.name);
         }
     } catch (err) {
         _didIteratorError = true;

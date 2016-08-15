@@ -19,15 +19,33 @@
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Computes the direction and cross boundaries for the given sprite.
+ * @desc If the Sprite is auto-loaded, analyze direction; otherwise, wait.
  *
- * @param Sprite {Animal | Player | Item} Object containing a Phaser sprite.
+ * @param Sprite {Animal | Player | Item} Object containing a Phaser isometric sprite.
  *
  * @see Animal
  * @see Player
+ * @see Item
  */
 
 function direction(Sprite) {
+
+    if (Sprite.auto) {
+        _assignDirection(Sprite);
+    }
+}
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Computes the current direction of the given Sprite.
+ *
+ * @param Sprite {Animal | Player | Item} Object containing a Phaser isometric sprite.
+ *
+ * @private
+ */
+
+function _assignDirection(Sprite) {
 
     var sprite = Sprite.sprite,
         x = sprite.body.frontX,
