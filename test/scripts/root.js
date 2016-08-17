@@ -85,7 +85,7 @@ var isogame = function (scope, injector) {
             characters.physicsBodyType = Phaser.Plugin.Isometric.ISOARCADE;
 
             // create a new map with fog of war on, a randomly generated tilemap.
-            map = new Map(game, groundTiles, "tileset", tileSize, 25, null, true);
+            map = new Map(game, groundTiles, "tileset", tileSize, 25);
 
             // load the sprites (Animals, Player(s)) and assign them to their containers
             sprites = load.sprites(map, characters);
@@ -105,7 +105,14 @@ var isogame = function (scope, injector) {
             load.inventory(inventory, space);
             
             // create a guide
-            guide = new Guide("guide", "gameCanvas");
+            guide = new Guide("guide", "gameCanvas",
+                {
+                    style: {
+                        "color": "#000",
+                        "background-color": "#FFF"
+                    }
+                }
+            );
 
             /*
             this allows the game to be accessed from outside this file; when a new game is created in the angular
