@@ -267,6 +267,7 @@ Inventory.prototype._reset = function () {
     this.menuGroup.forEach(function (item) {
         item.input.useHandCursor = true;
         item.tint = 0xFFFFFF;
+        item.text.tint = 0xFFFFFF;
 
         if (item.clicked) {
             item.clicked = false;

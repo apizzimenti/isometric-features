@@ -13,7 +13,11 @@
  *
  * @param element {string} String id for the HTML element that will serve as your guide..
  * @param gameElement {string} String id for element that hosts the game canvas (the same name as when the Phaser game is initialized).
- * @param [styles=null] {object} Custom style overrides.
+ * @param [buttonOptions=null] {object} Button text and style options.
+ * @param [buttonOptions.text="i"] {string} Text displayed within the button.
+ * @param [buttonOptions.style={}] {object} Styling for guide button.
+ * @param [buttonOptions.hover={}] {object} Styling for guide button
+ * @param [menuStyles=null] {object} Custom style overrides.
  *
  * @example
  *
@@ -47,11 +51,12 @@
  * @constructor
  */
 
-function Guide(element, gameElement, styles) {
+function Guide(element, gameElement, buttonOptions, menuStyles) {
 
     var _this = this;
 
     this.raw = {};
+    this.raw.buttonOptions = buttonOptions || null;
     this.raw.guideId = element;
     this.raw.canvasId = gameElement;
     this.raw.guide = document.getElementById(element);
@@ -61,7 +66,7 @@ function Guide(element, gameElement, styles) {
     this.raw.offsetTop = this.raw.canvas.offsetTop;
     this.raw.offsetLeft = this.raw.canvas.offsetLeft;
     this.raw.on = false;
-    this.raw.guide.styles = styles || null;
+    this.raw.guide.styles = menuStyles || null;
 
     $(document).ready(function () {
         _this.guideElement = $("#" + element);
@@ -84,7 +89,7 @@ function Guide(element, gameElement, styles) {
 Guide.prototype._button = function () {
 
     var button = document.createElement("button"),
-        buttonText = document.createTextNode("i"),
+        buttonText = document.createTextNode(this.raw.buttonOptions.text || "i"),
         id = "guideButton",
         template = "#" + id,
         _this = this;
@@ -95,16 +100,28 @@ Guide.prototype._button = function () {
     this.raw.guideButton = button;
     this.raw.guideButton.className = "guide-button";
     this.raw.guideButton.on = false;
+    this.raw.guideButton.template = template;
 
     $(template).css({
         "top": _this.raw.offsetTop + 20,
         "left": _this.raw.offsetLeft + 20
     });
 
+    if (this.raw.buttonOptions.style) {
+        $(template).css(this.raw.buttonOptions.style);
+    }
+
     $(template).hover(function () {
         $(template).css({
             "cursor": "pointer"
         });
+
+        $(template).css(_this.raw.buttonOptions.hover || null);
+    }, function () {
+        $(template).css({
+            "cursor": "default"
+        });
+        $(template).css(_this.raw.buttonOptions.style || null);
     });
 
     $(template).click(function () {
