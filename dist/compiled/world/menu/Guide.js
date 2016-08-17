@@ -116,12 +116,17 @@ Guide.prototype._button = function () {
             "cursor": "pointer"
         });
 
-        $(template).css(_this.raw.buttonOptions.hover || null);
+        if (_this.raw.buttonOptions.hover) {
+            $(template).css(_this.raw.buttonOptions.hover);
+        }
     }, function () {
         $(template).css({
             "cursor": "default"
         });
-        $(template).css(_this.raw.buttonOptions.style || null);
+
+        if (_this.raw.buttonOptions.style) {
+            $(template).css(_this.raw.buttonOptions.style);
+        }
     });
 
     $(template).click(function () {
