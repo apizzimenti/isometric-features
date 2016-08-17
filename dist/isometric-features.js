@@ -1418,9 +1418,6 @@ Player.prototype._instantiate = function () {
     this.sprite.tile = {};
 
     this.sprite.body.bounce = new Phaser.Plugin.Isometric.Point3(0.5, 0.5, 0.5);
-
-    // initialize direction
-    direction(this);
 };
 
 /**
