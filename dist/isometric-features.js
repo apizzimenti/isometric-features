@@ -1665,7 +1665,15 @@ function Guide(element, gameElement, buttonOptions, menuStyles) {
     var _this = this;
 
     this.raw = {};
+
     this.raw.buttonOptions = buttonOptions || null;
+    this.raw.buttonOptions.default = {
+        "color": "#FFF",
+        "border": "none",
+        "font-size": "20px",
+        "background-color": "transparent"
+    };
+
     this.raw.guideId = element;
     this.raw.canvasId = gameElement;
     this.raw.guide = document.getElementById(element);
@@ -1735,6 +1743,8 @@ Guide.prototype._button = function () {
 
         if (_this.raw.buttonOptions.style) {
             $(template).css(_this.raw.buttonOptions.style);
+        } else {
+            $(template).css(_this.raw.buttonOptions.default);
         }
     });
 
