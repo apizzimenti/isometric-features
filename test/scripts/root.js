@@ -107,12 +107,9 @@ var isogame = function (scope, injector) {
             // create a guide
             guide = new Guide("guide", "gameCanvas",
                 {
+                    text: "damn",
                     hover: {
-                        "background-color": "#E8E8E8"
-                    },
-                    style: {
-                        "color": "#000",
-                        "background-color": "#FFF"
+                        "background-color": "#E069FF"
                     }
                 }
             );
