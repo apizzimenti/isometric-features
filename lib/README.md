@@ -36,9 +36,7 @@ This is because JavaScript has lexical *and* function scoping, so `this` refers 
 `set` has no `say()` method, so it cannot be called.
 
 #### `Uncaught TypeError: Cannot read property <num> of undefined.`
-This is an error with the physics system. If you find this bug, please report it immediately to one of the email addresses
-below. It may not happen every time, but it can happen sometimes.
-
+This is an error with the physics system. If this error occurs, you possibly have an outdated version of the package.
 ### Dependency Chain
 
 Many constructs in this game require others as dependencies. As such, before each is declared, it should have all of
