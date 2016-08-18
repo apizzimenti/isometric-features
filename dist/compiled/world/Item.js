@@ -12,6 +12,7 @@
  * @param game {object} Current Phaser game instance.
  * @param key {string} Cached Phaser texture or image.
  * @param inventory {Inventory} Game's Inventory.
+ * @param [name=Item.key] {string} Item's name to be displayed in the Inventory.
  *
  * @property game {object} Phaser game instance.
  * @property key {string} The key that belongs to this Item.
@@ -30,7 +31,7 @@
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function Item(game, key, inventory) {
+function Item(game, key, inventory, name) {
 
   this.keys = [key, key, key, key];
 

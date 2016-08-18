@@ -29,6 +29,9 @@ function Debug(game) {
     this.y = 20;
     this.color = "#FFF";
     this.on = true;
+
+    var graphics = game.add.graphics(0, 0),
+        _this = this;
 }
 
 /**
@@ -40,6 +43,7 @@ function Debug(game) {
  */
 
 Debug.prototype.fps = function () {
+
     if (this.on) {
         this.game.debug.text(this.game.time.fps, this.x, this.y, this.color);
     }
@@ -58,8 +62,9 @@ Debug.prototype.fps = function () {
  */
 
 Debug.prototype.mousePos = function (mouse) {
+
     if (this.on) {
-        this.game.debug.text(mouse.tile.row + ", " + mouse.tile.col, this.x, this.y, this.color);
+        this.game.debug.text(mouse.row + ", " + mouse.col, this.x, this.y + 20, this.color);
     }
 };
 
@@ -74,23 +79,30 @@ Debug.prototype.mousePos = function (mouse) {
  */
 
 Debug.prototype.sprite = function (sprites) {
-    var _this = this;
+    var _this2 = this;
 
     if (this.on) {
         var debugSprite = function debugSprite(sprite) {
-            _this.game.debug.text(sprite.sprite.row + ", " + sprite.sprite.col, _this.x, _this.y, _this.color);
 
             try {
-                _this.game.debug.body(sprite.sprite.tile.top, "#FF0000", false);
-                _this.game.debug.body(sprite.sprite, "#FFFFFF", false);
 
-                for (var tile in sprite.sprite.tile) {
-                    if (sprite.tile.hasOwnProperty(tile) && tile !== "top") {
-                        _this.game.debug.body(sprite.tile[tile], "#FFDD00", false);
+                var s = sprite.sprite;
+
+                _this2.game.debug.body(s, "#FFFFFF", false);
+
+                if (s.tile) {
+                    _this2.game.debug.body(s.tile.top, "#FF0000", false);
+                }
+
+                if (s.tile) {
+                    for (var tile in s.tile) {
+                        if (s.tile.hasOwnProperty(tile) && tile !== "top") {
+                            _this2.game.debug.body(s.tile[tile], "#FFDD00", false);
+                        }
                     }
                 }
             } catch (e) {
-                console.log("%cSprite has not loaded yet", "color: red");
+                console.warn(sprite.type + " is not yet loaded");
             }
         };
 

@@ -72,7 +72,10 @@ function Player(game, row, col, keys, group, map, scale, auto) {
 
     this.sprite = this.game.add.isoSprite(x, y, 0, keys[0], null, group);
     (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(Globals.anchor));
+
     this.sprite.body.collideWorldBounds = true;
+    this.sprite.body.moves = false;
+
     (_sprite$scale = this.sprite.scale).setTo.apply(_sprite$scale, _toConsumableArray(this.scale));
     this.sprite.visible = false;
     this.game.camera.follow(this.sprite);
@@ -129,6 +132,7 @@ Player.prototype._instantiate = function () {
     this.sprite.tile = {};
 
     this.sprite.body.bounce = new Phaser.Plugin.Isometric.Point3(0.5, 0.5, 0.5);
+    this.sprite.body.moves = true;
 };
 
 /**

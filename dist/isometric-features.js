@@ -1,4 +1,4 @@
-/*! iso-game-features - v0.0.1 - 2016-08-17
+/*! iso-game-features - v0.0.1 - 2016-08-18
 * Copyright (c) 2016 ; Licensed MIT */
 "use strict";
 
@@ -336,6 +336,9 @@ function Debug(game) {
     this.y = 20;
     this.color = "#FFF";
     this.on = true;
+
+    var graphics = game.add.graphics(0, 0),
+        _this = this;
 }
 
 /**
@@ -347,6 +350,7 @@ function Debug(game) {
  */
 
 Debug.prototype.fps = function () {
+
     if (this.on) {
         this.game.debug.text(this.game.time.fps, this.x, this.y, this.color);
     }
@@ -365,8 +369,9 @@ Debug.prototype.fps = function () {
  */
 
 Debug.prototype.mousePos = function (mouse) {
+
     if (this.on) {
-        this.game.debug.text(mouse.tile.row + ", " + mouse.tile.col, this.x, this.y, this.color);
+        this.game.debug.text(mouse.row + ", " + mouse.col, this.x, this.y + 20, this.color);
     }
 };
 
@@ -381,23 +386,30 @@ Debug.prototype.mousePos = function (mouse) {
  */
 
 Debug.prototype.sprite = function (sprites) {
-    var _this = this;
+    var _this2 = this;
 
     if (this.on) {
         var debugSprite = function debugSprite(sprite) {
-            _this.game.debug.text(sprite.sprite.row + ", " + sprite.sprite.col, _this.x, _this.y, _this.color);
 
             try {
-                _this.game.debug.body(sprite.sprite.tile.top, "#FF0000", false);
-                _this.game.debug.body(sprite.sprite, "#FFFFFF", false);
 
-                for (var tile in sprite.sprite.tile) {
-                    if (sprite.tile.hasOwnProperty(tile) && tile !== "top") {
-                        _this.game.debug.body(sprite.tile[tile], "#FFDD00", false);
+                var s = sprite.sprite;
+
+                _this2.game.debug.body(s, "#FFFFFF", false);
+
+                if (s.tile) {
+                    _this2.game.debug.body(s.tile.top, "#FF0000", false);
+                }
+
+                if (s.tile) {
+                    for (var tile in s.tile) {
+                        if (s.tile.hasOwnProperty(tile) && tile !== "top") {
+                            _this2.game.debug.body(s.tile[tile], "#FFDD00", false);
+                        }
                     }
                 }
             } catch (e) {
-                console.log("%cSprite has not loaded yet", "color: red");
+                console.warn(sprite.type + " is not yet loaded");
             }
         };
 
@@ -1042,6 +1054,7 @@ function createAnimals(scope, num, game, keys, group, map, species) {
  * @param game {object} Current Phaser game instance.
  * @param key {string} Cached Phaser texture or image.
  * @param inventory {Inventory} Game's Inventory.
+ * @param [name=Item.key] {string} Item's name to be displayed in the Inventory.
  *
  * @property game {object} Phaser game instance.
  * @property key {string} The key that belongs to this Item.
@@ -1060,7 +1073,7 @@ function createAnimals(scope, num, game, keys, group, map, species) {
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function Item(game, key, inventory) {
+function Item(game, key, inventory, name) {
 
   this.keys = [key, key, key, key];
 
@@ -1361,7 +1374,10 @@ function Player(game, row, col, keys, group, map, scale, auto) {
 
     this.sprite = this.game.add.isoSprite(x, y, 0, keys[0], null, group);
     (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(Globals.anchor));
+
     this.sprite.body.collideWorldBounds = true;
+    this.sprite.body.moves = false;
+
     (_sprite$scale = this.sprite.scale).setTo.apply(_sprite$scale, _toConsumableArray(this.scale));
     this.sprite.visible = false;
     this.game.camera.follow(this.sprite);
@@ -1418,6 +1434,7 @@ Player.prototype._instantiate = function () {
     this.sprite.tile = {};
 
     this.sprite.body.bounce = new Phaser.Plugin.Isometric.Point3(0.5, 0.5, 0.5);
+    this.sprite.body.moves = true;
 };
 
 /**
@@ -1852,6 +1869,7 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
     this.map = map;
 
     this.items = [];
+    this.itemCache = {};
     this.itemsRow = [];
 
     var graphics = game.add.graphics(0, 0),
@@ -1928,11 +1946,10 @@ Inventory.prototype.addItem = function (item) {
     this.j -= w;
     this.itemsRow.push(item);
     this.items[item.inventorySprite.row] = this.itemsRow;
-    this.count++;
+    this.itemCache[item.key] = item;
 
     if (this.j === 0) {
 
-        this.count = 0;
         this.i -= h;
         this.j = this.area.width;
         this.items[item.inventorySprite.row + 1] = [];
@@ -1959,7 +1976,7 @@ Inventory.prototype.addItems = function (items) {
     var _this2 = this;
 
     if (!Array.isArray(items)) {
-        throw new Error("Use addItem for single items.");
+        throw new Error("Use addItem(item) for single items.");
     } else {
         items.forEach(function (item) {
             _this2.addItem(item);
@@ -2058,11 +2075,12 @@ Inventory.prototype._click = function () {
  */
 
 Inventory.prototype._reset = function () {
+    var _this4 = this;
 
     this.menuGroup.forEach(function (item) {
         item.input.useHandCursor = true;
         item.tint = 0xFFFFFF;
-        item.text.tint = 0xFFFFFF;
+        _this4.itemCache[item.key].text.tint = 0xFFFFFF;
 
         if (item.clicked) {
             item.clicked = false;

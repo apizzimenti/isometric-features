@@ -57,6 +57,7 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
     this.map = map;
 
     this.items = [];
+    this.itemCache = {};
     this.itemsRow = [];
 
     var graphics = game.add.graphics(0, 0),
@@ -133,11 +134,10 @@ Inventory.prototype.addItem = function (item) {
     this.j -= w;
     this.itemsRow.push(item);
     this.items[item.inventorySprite.row] = this.itemsRow;
-    this.count++;
+    this.itemCache[item.key] = item;
 
     if (this.j === 0) {
 
-        this.count = 0;
         this.i -= h;
         this.j = this.area.width;
         this.items[item.inventorySprite.row + 1] = [];
@@ -164,7 +164,7 @@ Inventory.prototype.addItems = function (items) {
     var _this2 = this;
 
     if (!Array.isArray(items)) {
-        throw new Error("Use addItem for single items.");
+        throw new Error("Use addItem(item) for single items.");
     } else {
         items.forEach(function (item) {
             _this2.addItem(item);
@@ -263,11 +263,12 @@ Inventory.prototype._click = function () {
  */
 
 Inventory.prototype._reset = function () {
+    var _this4 = this;
 
     this.menuGroup.forEach(function (item) {
         item.input.useHandCursor = true;
         item.tint = 0xFFFFFF;
-        item.text.tint = 0xFFFFFF;
+        _this4.itemCache[item.key].text.tint = 0xFFFFFF;
 
         if (item.clicked) {
             item.clicked = false;
