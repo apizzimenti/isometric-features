@@ -85,7 +85,7 @@ var isogame = function (scope, injector) {
             characters.physicsBodyType = Phaser.Plugin.Isometric.ISOARCADE;
 
             // create a new map with fog of war on, a randomly generated tilemap.
-            map = new Map(game, groundTiles, "tileset", tileSize, 25);
+            map = new Map(game, groundTiles, "tileset", tileSize, 15);
 
             // load the sprites (Animals, Player(s)) and assign them to their containers
             sprites = load.sprites(map, characters);
@@ -107,9 +107,10 @@ var isogame = function (scope, injector) {
             // create a guide
             guide = new Guide("guide", "gameCanvas",
                 {
-                    text: "damn",
+                    text: "info",
                     hover: {
-                        "background-color": "#E069FF"
+                        "color": "#D33111",
+                        "font-weight": "bold"
                     }
                 }
             );
@@ -178,8 +179,7 @@ var isogame = function (scope, injector) {
         render: function () {
 
             // debug usually goes here
-            
-            // debug.sprite(creatures);
+
         }
     };
 
