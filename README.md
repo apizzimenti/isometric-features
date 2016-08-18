@@ -1,5 +1,9 @@
 # isometric-features
 
+[![Github Tag](https://img.shields.io/github/tag/apizzimenti/isometric-features.svg?maxAge=2592000)]()
+[![GitHub release](https://img.shields.io/github/release/apizzimenti/isometric-features.svg?maxAge=2592000)]()
+[![license](https://img.shields.io/github/license/apizzimenti/isometric-features.svg?maxAge=2592000)]()
+
 This project is supplemental to lewster32's [phaser-plugin-isometric](https://github.com/lewster32/phaser-plugin-isometric).
 
 ### features
