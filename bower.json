@@ -14,12 +14,20 @@
     "phaser-isometric": "*",
     "angular": "^1.5.7",
     "easystarjs": "easystar.js#^0.3.0",
-    "jquery": "^3.1.0"
+    "jquery": "^3.1.0",
+    "webfontloader": "^1.6.26"
   },
   "devDependencies": {},
   "appPath": "app",
   "main": [
     "dist/guide.min.css",
     "dist/isometric-features.js"
-  ]
+  ],
+  "overrides": {
+    "phaser-isometric": {
+      "main": [
+        "dist/phaser-plugin-isometric.js"
+      ]
+    }
+  }
 }
