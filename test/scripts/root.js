@@ -166,6 +166,7 @@ var isogame = function (scope, injector) {
             when the scroll wheel is rotated. After it's fully set, load the Animal array into the Scanner so it knows
             when to take pictures
              */
+
             if (load.items.scanner.setting) {
                 direction(load.items.scanner);
                 load.items.scanner.setRadius();
@@ -179,6 +180,10 @@ var isogame = function (scope, injector) {
         render: function () {
 
             // debug usually goes here
+            debug.sprite(creatures);
+            debug.sprite(player);
+            debug.fps();
+            debug.mousePos(mouse);
 
         }
     };
