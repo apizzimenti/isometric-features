@@ -33,20 +33,26 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function Item(game, key, inventory, name) {
 
-  this.keys = [key, key, key, key];
+    this.keys = [key, key, key, key];
 
-  this.game = game;
-  this.key = key;
+    this.game = game;
+    this.key = key;
 
-  this.inventory = inventory;
-  this.text = {};
+    if (name) {
+        this.name = name;
+    } else {
+        this.name = key;
+    }
 
-  this.inventorySprite = {};
-  this.sprite = {};
-  this.sprite.tile = {};
-  this.sprite.direction = 0;
-  this.map = this.inventory.map;
-  this.auto = true;
+    this.inventory = inventory;
+    this.text = {};
+
+    this.inventorySprite = {};
+    this.sprite = {};
+    this.sprite.tile = {};
+    this.sprite.direction = 0;
+    this.map = this.inventory.map;
+    this.auto = true;
 }
 
 /**
@@ -58,7 +64,7 @@ function Item(game, key, inventory, name) {
  */
 
 Item.prototype.action = function () {
-  console.warn(this.key + " is using the builtin action method");
+    console.warn(this.key + " is using the builtin action method");
 };
 
 /**
@@ -70,18 +76,18 @@ Item.prototype.action = function () {
  */
 
 Item.prototype.threeDInitialize = function () {
-  var _sprite$anchor;
+    var _sprite$anchor;
 
-  (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(Globals.anchor));
-  this.sprite.body.collideWorldBounds = true;
-  this.game.physics.isoArcade.enable(this.sprite);
-  this.sprite.enableBody = true;
+    (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(Globals.anchor));
+    this.sprite.body.collideWorldBounds = true;
+    this.game.physics.isoArcade.enable(this.sprite);
+    this.sprite.enableBody = true;
 
-  this.sprite.tile = {};
-  this.sprite.direction = 0;
+    this.sprite.tile = {};
+    this.sprite.direction = 0;
 
-  this.sprite.body.immovable = true;
+    this.sprite.body.immovable = true;
 
-  this.setting = true;
-  direction(this);
+    this.setting = true;
+    direction(this);
 };
