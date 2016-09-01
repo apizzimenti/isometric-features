@@ -76,8 +76,8 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
     this.itemGroup = itemGroup;
 
     graphics.fixedToCamera = true;
-    graphics.lineStyle(2, 0xFF0000, 1);
-    graphics.beginFill(0xFF0000, 0.4);
+    graphics.lineStyle(2, 0xFF0000, 0.5);
+    graphics.beginFill(0xFF0000, 0.3);
     graphics.drawRect(this.width - areaWidth, this.height - areaHeight, areaWidth, areaHeight);
     this.graphics = graphics;
 

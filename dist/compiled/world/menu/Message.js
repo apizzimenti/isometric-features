@@ -17,7 +17,7 @@
  *
  * @property game {object} Phaser game instance.
  * @property y {number} Height of the game.
- * @property message {string | string[]} Message to be displayed.
+ * @property messages {string[]} Message queue.
  * @property fontSize {number} Font size.
  * @property style {object} Message styling.
  * @property style.font {string} Font style.
@@ -34,7 +34,7 @@ function Message(game, size, loc) {
 
     this.game = game;
     this.y = this.game.height;
-    this.message = "";
+    this.messages = [];
     this.loc = loc;
     this.fontSize = size;
     this.style = {
@@ -60,26 +60,28 @@ function Message(game, size, loc) {
  */
 
 Message.prototype.add = function (message) {
-    this.message = message;
-    this.alert.dispatch();
+    this.messages.push(message);
+
+    if (this.messages.length <= 1) {
+        this.alert.dispatch();
+    }
 };
 
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Displays the message on the screen for five seconds, with in and out tweens.
+ * @desc Displays the message at the front of the queue on the screen for five seconds, with in and out tweens.
  *
  * @private
  *
  * @this Message
- *
- * @todo get messages queue to work
  */
 
 Message.prototype._display = function () {
     var _this2 = this;
 
-    var str = this._format(this.message);
+    var str = this._format(this.messages[0]),
+        tween;
 
     this.text = this.game.add.text(str.x, str.y, str.msg, this.style);
 
@@ -88,8 +90,15 @@ Message.prototype._display = function () {
 
     this.game.add.tween(this.text).to({ alpha: 1 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
 
-    this.game.time.events.add(Phaser.Timer.SECOND * 5, function () {
-        _this2.game.add.tween(_this2.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+    this.game.time.events.add(Phaser.Timer.SECOND * 3, function () {
+        tween = _this2.game.add.tween(_this2.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+
+        tween.onComplete.add(function () {
+            _this2.messages = _this2.messages.slice(1, _this2.messages.length);
+            if (_this2.messages.length !== 0) {
+                _this2.alert.dispatch();
+            }
+        });
     });
 };
 

@@ -1,4 +1,4 @@
-/*! iso-game-features - v0.0.1 - 2016-08-18
+/*! iso-game-features - v0.0.1 - 2016-09-01
 * Copyright (c) 2016 ; Licensed MIT */
 "use strict";
 
@@ -330,15 +330,37 @@ function resetSprite(sprite, body) {
  */
 
 function Debug(game) {
+    var _this2 = this;
 
     this.game = game;
     this.x = this.game.width / 2;
     this.y = 20;
     this.color = "#FFF";
-    this.on = true;
+    this.on = false;
 
     var graphics = game.add.graphics(0, 0),
         _this = this;
+
+    graphics.fixedToCamera = true;
+    graphics.lineStyle(1, 0xFFFFFF, 0);
+    graphics.beginFill(0, 0xFFFFFF, 0);
+    this.graphics = graphics;
+
+    this.button = graphics.drawRect(20, 50, 62, 25);
+    this.button.inputEnabled = true;
+    this.button.input.useHandCursor = true;
+
+    this.text = this.game.add.text(25, 50, "debug", {
+        font: "Courier",
+        fontSize: 20,
+        fill: "white"
+    });
+
+    this.text.fixedToCamera = true;
+
+    this.button.events.onInputDown.add(function () {
+        _this2._switch();
+    });
 }
 
 /**
@@ -386,7 +408,7 @@ Debug.prototype.mousePos = function (mouse) {
  */
 
 Debug.prototype.sprite = function (sprites) {
-    var _this2 = this;
+    var _this3 = this;
 
     if (this.on) {
         var debugSprite = function debugSprite(sprite) {
@@ -395,16 +417,16 @@ Debug.prototype.sprite = function (sprites) {
 
                 var s = sprite.sprite;
 
-                _this2.game.debug.body(s, "#FFFFFF", false);
+                _this3.game.debug.body(s, "#FFFFFF", false);
 
                 if (s.tile) {
-                    _this2.game.debug.body(s.tile.top, "#FF0000", false);
+                    _this3.game.debug.body(s.tile.top, "#FF0000", false);
                 }
 
                 if (s.tile) {
                     for (var tile in s.tile) {
                         if (s.tile.hasOwnProperty(tile) && tile !== "top") {
-                            _this2.game.debug.body(s.tile[tile], "#FFDD00", false);
+                            _this3.game.debug.body(s.tile[tile], "#FFDD00", false);
                         }
                     }
                 }
@@ -448,7 +470,7 @@ Debug.prototype.sprite = function (sprites) {
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Displays blocked tiles' debug bodies.
+ * @desc Displays blocked tiles" debug bodies.
  *
  * @param tiles {sprite[]} An array of tile sprites.
  *
@@ -475,12 +497,12 @@ Debug.prototype.tiles = function (tiles) {
  *
  * @desc Allows for future implementation of a _button on/off switch for displaying debug info.
  *
- * @this Debug
+ * @private
  *
- * @todo Implement buttons.
+ * @this Debug
  */
 
-Debug.prototype.switch = function () {
+Debug.prototype._switch = function () {
     this.on = !this.on;
 };
 
@@ -1100,7 +1122,7 @@ function Item(game, key, inventory, name) {
  */
 
 Item.prototype.action = function () {
-  console.log("NoActionMethod: " + this.key + " is using the builtin action method");
+  console.warn(this.key + " is using the builtin action method");
 };
 
 /**
@@ -1888,8 +1910,8 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
     this.itemGroup = itemGroup;
 
     graphics.fixedToCamera = true;
-    graphics.lineStyle(2, 0xFF0000, 1);
-    graphics.beginFill(0xFF0000, 0.4);
+    graphics.lineStyle(2, 0xFF0000, 0.5);
+    graphics.beginFill(0xFF0000, 0.3);
     graphics.drawRect(this.width - areaWidth, this.height - areaHeight, areaWidth, areaHeight);
     this.graphics = graphics;
 
@@ -2150,7 +2172,7 @@ Inventory.prototype._placeItem = function () {
  *
  * @property game {object} Phaser game instance.
  * @property y {number} Height of the game.
- * @property message {string | string[]} Message to be displayed.
+ * @property messages {string[]} Message queue.
  * @property fontSize {number} Font size.
  * @property style {object} Message styling.
  * @property style.font {string} Font style.
@@ -2167,7 +2189,7 @@ function Message(game, size, loc) {
 
     this.game = game;
     this.y = this.game.height;
-    this.message = "";
+    this.messages = [];
     this.loc = loc;
     this.fontSize = size;
     this.style = {
@@ -2193,26 +2215,28 @@ function Message(game, size, loc) {
  */
 
 Message.prototype.add = function (message) {
-    this.message = message;
-    this.alert.dispatch();
+    this.messages.push(message);
+
+    if (this.messages.length <= 1) {
+        this.alert.dispatch();
+    }
 };
 
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Displays the message on the screen for five seconds, with in and out tweens.
+ * @desc Displays the message at the front of the queue on the screen for five seconds, with in and out tweens.
  *
  * @private
  *
  * @this Message
- *
- * @todo get messages queue to work
  */
 
 Message.prototype._display = function () {
     var _this2 = this;
 
-    var str = this._format(this.message);
+    var str = this._format(this.messages[0]),
+        tween;
 
     this.text = this.game.add.text(str.x, str.y, str.msg, this.style);
 
@@ -2221,8 +2245,15 @@ Message.prototype._display = function () {
 
     this.game.add.tween(this.text).to({ alpha: 1 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
 
-    this.game.time.events.add(Phaser.Timer.SECOND * 5, function () {
-        _this2.game.add.tween(_this2.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+    this.game.time.events.add(Phaser.Timer.SECOND * 3, function () {
+        tween = _this2.game.add.tween(_this2.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+
+        tween.onComplete.add(function () {
+            _this2.messages = _this2.messages.slice(1, _this2.messages.length);
+            if (_this2.messages.length !== 0) {
+                _this2.alert.dispatch();
+            }
+        });
     });
 };
 

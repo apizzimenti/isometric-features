@@ -23,15 +23,37 @@
  */
 
 function Debug(game) {
+    var _this2 = this;
 
     this.game = game;
     this.x = this.game.width / 2;
     this.y = 20;
     this.color = "#FFF";
-    this.on = true;
+    this.on = false;
 
     var graphics = game.add.graphics(0, 0),
         _this = this;
+
+    graphics.fixedToCamera = true;
+    graphics.lineStyle(1, 0xFFFFFF, 0);
+    graphics.beginFill(0, 0xFFFFFF, 0);
+    this.graphics = graphics;
+
+    this.button = graphics.drawRect(20, 50, 62, 25);
+    this.button.inputEnabled = true;
+    this.button.input.useHandCursor = true;
+
+    this.text = this.game.add.text(25, 50, "debug", {
+        font: "Courier",
+        fontSize: 20,
+        fill: "white"
+    });
+
+    this.text.fixedToCamera = true;
+
+    this.button.events.onInputDown.add(function () {
+        _this2._switch();
+    });
 }
 
 /**
@@ -79,7 +101,7 @@ Debug.prototype.mousePos = function (mouse) {
  */
 
 Debug.prototype.sprite = function (sprites) {
-    var _this2 = this;
+    var _this3 = this;
 
     if (this.on) {
         var debugSprite = function debugSprite(sprite) {
@@ -88,16 +110,16 @@ Debug.prototype.sprite = function (sprites) {
 
                 var s = sprite.sprite;
 
-                _this2.game.debug.body(s, "#FFFFFF", false);
+                _this3.game.debug.body(s, "#FFFFFF", false);
 
                 if (s.tile) {
-                    _this2.game.debug.body(s.tile.top, "#FF0000", false);
+                    _this3.game.debug.body(s.tile.top, "#FF0000", false);
                 }
 
                 if (s.tile) {
                     for (var tile in s.tile) {
                         if (s.tile.hasOwnProperty(tile) && tile !== "top") {
-                            _this2.game.debug.body(s.tile[tile], "#FFDD00", false);
+                            _this3.game.debug.body(s.tile[tile], "#FFDD00", false);
                         }
                     }
                 }
@@ -141,7 +163,7 @@ Debug.prototype.sprite = function (sprites) {
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Displays blocked tiles' debug bodies.
+ * @desc Displays blocked tiles" debug bodies.
  *
  * @param tiles {sprite[]} An array of tile sprites.
  *
@@ -168,11 +190,11 @@ Debug.prototype.tiles = function (tiles) {
  *
  * @desc Allows for future implementation of a _button on/off switch for displaying debug info.
  *
- * @this Debug
+ * @private
  *
- * @todo Implement buttons.
+ * @this Debug
  */
 
-Debug.prototype.switch = function () {
+Debug.prototype._switch = function () {
     this.on = !this.on;
 };
