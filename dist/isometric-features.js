@@ -1,4 +1,4 @@
-/*! iso-game-features - v0.0.1 - 2016-09-01
+/*! iso-game-features - v0.0.1 - 2016-09-02
 * Copyright (c) 2016 ; Licensed MIT */
 "use strict";
 
@@ -1134,7 +1134,7 @@ Item.prototype.action = function () {
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Initializes objects for the isometric physics system. Sprites are immovable.
+ * @desc Initializes objects for the isometric physics system.
  *
  * @this Item
  */
@@ -1149,8 +1149,6 @@ Item.prototype.threeDInitialize = function () {
 
     this.sprite.tile = {};
     this.sprite.direction = 0;
-
-    this.sprite.body.immovable = true;
 
     this.setting = true;
     direction(this);
