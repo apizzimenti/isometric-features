@@ -71,6 +71,8 @@ module.exports = function (grunt) {
                 }]
             }
         },
+
+        clean: ["dist/**/*"],
     
         jsdoc: {
             dist: {
@@ -84,7 +86,7 @@ module.exports = function (grunt) {
         
         includeSource: {
             options: {
-                basepath: "dist/",
+                basepath: "",
                 baseUrl: "",
                 ordering: "",
                 rename: function (dest, match, options) {
@@ -130,6 +132,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks("grunt-include-source");
     grunt.loadNpmTasks("grunt-contrib-cssmin");
+    grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-babel");
     grunt.loadNpmTasks("grunt-jsdoc");
     grunt.loadNpmTasks("grunt-wiredep");
@@ -138,6 +141,6 @@ module.exports = function (grunt) {
     // Default task
     grunt.registerTask('default', ["strictly", "jsdoc"]);
     grunt.registerTask("test", ["includeSource", "wiredep"]);
-    grunt.registerTask("build", ["strictly", "babel", "cssmin", "concat", "uglify", "jsdoc"]);
+    grunt.registerTask("build", ["strictly", "clean", "babel", "cssmin", "concat", "uglify", "jsdoc"]);
 };
 
