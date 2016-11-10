@@ -65,14 +65,14 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
             tile = this.game.add.isoSprite(row * this.tileSize, col * this.tileSize, 0, this.tileSet, frame, this.group);
 
             if (col > tiles.length - 2 || row < 1 || row > tiles.length - 2 || col < 1) {
-                tile.tint = this.fog ? 0x571F57 : 0xFFFFFF;
                 tile.blocked = true;
                 blockedArray[row].push(0);
             } else {
                 tile.blocked = false;
-                tile.tint = this.fog ? 0x571F57 : 0xFFFFFF;
                 blockedArray[row].push(1);
             }
+
+            tile.tint = this.fog ? 0x571F57 : 0xFFFFFF;
 
             tile.discovered = this.fog ? false : true;
             tile.type = "tile";
@@ -152,28 +152,7 @@ Map.prototype._createTileMap = function (size) {
  */
 
 Map.prototype._generateMapKeys = function () {
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-
-    try {
-        for (var _iterator = this.game.cache._cache.image[this.tileSet].frameData._frames[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var frame = _step.value;
-
-            Globals.mapTileKey.push(frame.name);
-        }
-    } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-                _iterator.return();
-            }
-        } finally {
-            if (_didIteratorError) {
-                throw _iteratorError;
-            }
-        }
+    for (var frame of this.game.cache._cache.image[this.tileSet].frameData._frames) {
+        Globals.mapTileKey.push(frame.name);
     }
 };

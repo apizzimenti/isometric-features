@@ -23,7 +23,6 @@
  */
 
 function Debug(game) {
-    var _this2 = this;
 
     this.game = game;
     this.x = this.game.width / 2;
@@ -51,8 +50,8 @@ function Debug(game) {
 
     this.text.fixedToCamera = true;
 
-    this.button.events.onInputDown.add(function () {
-        _this2._switch();
+    this.button.events.onInputDown.add(() => {
+        this._switch();
     });
 }
 
@@ -86,7 +85,7 @@ Debug.prototype.fps = function () {
 Debug.prototype.mousePos = function (mouse) {
 
     if (this.on) {
-        this.game.debug.text(mouse.row + ", " + mouse.col, this.x, this.y + 20, this.color);
+        this.game.debug.text(`${ mouse.row }, ${ mouse.col }`, this.x, this.y + 20, this.color);
     }
 };
 
@@ -101,58 +100,36 @@ Debug.prototype.mousePos = function (mouse) {
  */
 
 Debug.prototype.sprite = function (sprites) {
-    var _this3 = this;
 
     if (this.on) {
-        var debugSprite = function debugSprite(sprite) {
+        var debugSprite = sprite => {
 
             try {
 
                 var s = sprite.sprite;
 
-                _this3.game.debug.body(s, "#FFFFFF", false);
+                this.game.debug.body(s, "#FFFFFF", false);
 
                 if (s.tile) {
-                    _this3.game.debug.body(s.tile.top, "#FF0000", false);
+                    this.game.debug.body(s.tile.top, "#FF0000", false);
                 }
 
                 if (s.tile) {
                     for (var tile in s.tile) {
                         if (s.tile.hasOwnProperty(tile) && tile !== "top") {
-                            _this3.game.debug.body(s.tile[tile], "#FFDD00", false);
+                            this.game.debug.body(s.tile[tile], "#FFDD00", false);
                         }
                     }
                 }
             } catch (e) {
-                console.warn(sprite.type + " is not yet loaded");
+                console.warn(`${ sprite.type } is not yet loaded`);
             }
         };
 
         if (Array.isArray(sprites)) {
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
 
-            try {
-
-                for (var _iterator = sprites[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var sprite = _step.value;
-
-                    debugSprite(sprite);
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
-                }
+            for (var sprite of sprites) {
+                debugSprite(sprite);
             }
         } else {
             debugSprite(sprites);

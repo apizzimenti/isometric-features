@@ -1,5 +1,3 @@
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 7/15/16.
@@ -30,7 +28,6 @@
  */
 
 function Message(game, size, loc) {
-    var _this = this;
 
     this.game = game;
     this.y = this.game.height;
@@ -44,8 +41,8 @@ function Message(game, size, loc) {
 
     this.alert = new Phaser.Signal();
 
-    this.alert.add(function () {
-        _this._display();
+    this.alert.add(() => {
+        this._display();
     });
 }
 
@@ -78,7 +75,6 @@ Message.prototype.add = function (message) {
  */
 
 Message.prototype._display = function () {
-    var _this2 = this;
 
     var str = this._format(this.messages[0]),
         tween;
@@ -90,13 +86,13 @@ Message.prototype._display = function () {
 
     this.game.add.tween(this.text).to({ alpha: 1 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
 
-    this.game.time.events.add(Phaser.Timer.SECOND * 3, function () {
-        tween = _this2.game.add.tween(_this2.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+    this.game.time.events.add(Phaser.Timer.SECOND * 3, () => {
+        tween = this.game.add.tween(this.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
 
-        tween.onComplete.add(function () {
-            _this2.messages = _this2.messages.slice(1, _this2.messages.length);
-            if (_this2.messages.length !== 0) {
-                _this2.alert.dispatch();
+        tween.onComplete.add(() => {
+            this.messages = this.messages.slice(1, this.messages.length);
+            if (this.messages.length !== 0) {
+                this.alert.dispatch();
             }
         });
     });

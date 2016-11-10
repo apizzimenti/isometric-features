@@ -43,10 +43,7 @@
  * @see Globals
  */
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function Player(game, row, col, keys, group, map, scale, auto) {
-    var _sprite$anchor, _sprite$scale;
 
     this.type = "player";
     this.map = map;
@@ -71,12 +68,12 @@ function Player(game, row, col, keys, group, map, scale, auto) {
     }
 
     this.sprite = this.game.add.isoSprite(x, y, 0, keys[0], null, group);
-    (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(Globals.anchor));
+    this.sprite.anchor.set(...Globals.anchor);
 
     this.sprite.body.collideWorldBounds = true;
     this.sprite.body.moves = false;
 
-    (_sprite$scale = this.sprite.scale).setTo.apply(_sprite$scale, _toConsumableArray(this.scale));
+    this.sprite.scale.setTo(...this.scale);
     this.sprite.visible = false;
     this.game.camera.follow(this.sprite);
 
@@ -95,16 +92,15 @@ function Player(game, row, col, keys, group, map, scale, auto) {
  */
 
 Player.prototype.create = function () {
-    var _this2 = this;
 
     this.sprite.visible = true;
 
     if (this.intro) {
         this.intro.start();
-        this.intro.onComplete.add(function () {
-            _this2._instantiate();
-            if (_this2.postTween) {
-                _this2.postTween.f(_this2);
+        this.intro.onComplete.add(() => {
+            this._instantiate();
+            if (this.postTween) {
+                this.postTween.f(this);
             }
         });
     } else {
@@ -169,7 +165,6 @@ Player.prototype._instantiate = function () {
  */
 
 Player.prototype.addIntro = function (preTween, tweenParameters, postTween) {
-    var _game$add$tween;
 
     var params = [],
         tP = tweenParameters;
@@ -213,7 +208,7 @@ Player.prototype.addIntro = function (preTween, tweenParameters, postTween) {
         params[2] = tP.easing;
     }
 
-    this.intro = (_game$add$tween = this.game.add.tween(this.sprite)).to.apply(_game$add$tween, params.concat([false, 0, 0, false]));
+    this.intro = this.game.add.tween(this.sprite).to(...params, false, 0, 0, false);
 };
 
 Player.prototype.addOuttro = function (tweenParameters) {};

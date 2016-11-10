@@ -1,4 +1,4 @@
-/*! iso-game-features - v0.0.1 - 2016-09-02
+/*! iso-game-features - v0.0.1 - 2016-09-06
 * Copyright (c) 2016 ; Licensed MIT */
 "use strict";
 
@@ -1217,14 +1217,14 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
             tile = this.game.add.isoSprite(row * this.tileSize, col * this.tileSize, 0, this.tileSet, frame, this.group);
 
             if (col > tiles.length - 2 || row < 1 || row > tiles.length - 2 || col < 1) {
-                tile.tint = this.fog ? 0x571F57 : 0xFFFFFF;
                 tile.blocked = true;
                 blockedArray[row].push(0);
             } else {
                 tile.blocked = false;
-                tile.tint = this.fog ? 0x571F57 : 0xFFFFFF;
                 blockedArray[row].push(1);
             }
+
+            tile.tint = this.fog ? 0x571F57 : 0xFFFFFF;
 
             tile.discovered = this.fog ? false : true;
             tile.type = "tile";

@@ -29,8 +29,6 @@
  * @this Item
  */
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function Item(game, key, inventory, name) {
 
     this.keys = [key, key, key, key];
@@ -64,7 +62,7 @@ function Item(game, key, inventory, name) {
  */
 
 Item.prototype.action = function () {
-    console.warn(this.key + " is using the builtin action method");
+    console.warn(`${ this.key } is using the builtin action method`);
 };
 
 /**
@@ -76,9 +74,8 @@ Item.prototype.action = function () {
  */
 
 Item.prototype.threeDInitialize = function () {
-    var _sprite$anchor;
 
-    (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(Globals.anchor));
+    this.sprite.anchor.set(...Globals.anchor);
     this.sprite.body.collideWorldBounds = true;
     this.game.physics.isoArcade.enable(this.sprite);
     this.sprite.enableBody = true;

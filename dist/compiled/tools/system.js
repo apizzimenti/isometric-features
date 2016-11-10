@@ -1,5 +1,3 @@
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 5/19/16.

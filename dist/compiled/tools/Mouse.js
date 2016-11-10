@@ -1,5 +1,3 @@
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 7/15/16.
@@ -83,40 +81,54 @@ Mouse.prototype.update = function () {
  *
  * @desc If the mouse is in selected mode (i.e. <code>switch</code> is true), this determines the tile to animate.
  *
+ * @param [callback] {function} The function used to determine the tile's behavior when it's being hovered over on select.
+ * @param [args] {Array}
+ *
  * @this Mouse
  */
 
-Mouse.prototype.selected = function () {
-    var _this = this;
+Mouse.prototype.selected = function (callback, args) {
 
     if (this.inBounds) {
 
-        this.group.forEach(function (tile) {
+        this.group.forEach(tile => {
 
-            if (tile.type === "tile") {
-                var inside = tile.isoBounds.containsXY(_this.threeD.x + _this.map.tileSize, _this.threeD.y + _this.map.tileSize);
+            if (tile.type === "tile" && !callback) {
+
+                var inside = tile.isoBounds.containsXY(this.threeD.x + this.map.tileSize, this.threeD.y + this.map.tileSize);
 
                 if (inside) {
 
-                    _this.tile = tile;
+                    this.tile = tile;
 
-                    _this.row = _this.tile.row;
-                    _this.col = _this.tile.col;
+                    this.row = this.tile.row;
+                    this.col = this.tile.col;
 
                     tile.tint = 0x98FB98;
-                    tile.alpha = 1.3 + Math.sin(_this.game.time.now * 0.007);
+                    tile.alpha = 1.3 + Math.sin(this.game.time.now * 0.007);
 
-                    _this.tween = _this.game.add.tween(tile).to({ isoZ: 5 }, 20, Phaser.Easing.Linear.None, true);
-                    _this.tweened = true;
+                    this.tween = this.game.add.tween(tile).to({ isoZ: 5 }, 20, Phaser.Easing.Linear.None, true);
+                    this.tweened = true;
                 } else {
 
-                    if (_this.tweened) {
-                        _this.tween.stop();
-                        _this.tweened = !_this.tweened;
+                    if (this.tweened) {
+                        this.tween.stop();
+                        this.tweened = !this.tweened;
                         tile.isoZ = 0;
                     }
+
                     tile.discovered ? tile.tint = 0xFFFFFF : tile.tint = 0x571F57;
                     tile.alpha = 1;
+                }
+            } else {
+
+                if (Array.isArray(args)) {
+
+                    callback(tile, ...args);
+                } else {
+
+                    delete arguments[0];
+                    callback(tile, ...Array.from(arguments));
                 }
             }
         });
@@ -134,15 +146,14 @@ Mouse.prototype.selected = function () {
  */
 
 Mouse.prototype.reset = function () {
-    var _this2 = this;
 
-    this.group.forEach(function (tile) {
+    this.group.forEach(tile => {
 
         if (tile.type === "tile") {
             tile.discovered ? tile.tint = 0xFFFFFF : tile.tint = 0x571F57;
             tile.alpha = 1;
             tile.isoZ = 0;
-            _this2.game.canvas.style.cursor = "default";
+            this.game.canvas.style.cursor = "default";
         }
     });
 };

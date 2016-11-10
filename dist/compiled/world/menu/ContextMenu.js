@@ -1,5 +1,3 @@
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 7/15/16.
@@ -36,11 +34,11 @@ function ContextMenu(Inventory) {
  * @desc Creates a context menu at the current x, y position.
  *
  * @this contextMenu
+ *
+ * @todo Accept actions param which provides {key => value} pairs that describe actions and provide callbacks
  */
 
-ContextMenu.prototype.createContextMenu = function () {
-    var _this = this;
-
+ContextMenu.prototype.createContextMenu = function (actions) {
     var x = this.mouse.twoD.x,
         y = this.mouse.twoD.y,
         graphics = this.game.add.graphics(0, 0);
@@ -52,7 +50,7 @@ ContextMenu.prototype.createContextMenu = function () {
 
     this.menu = this.graphics.drawRect(x, y, 100, 150);
 
-    this.mouse.mouse.onDown.add(function () {
-        _this.menu.destroy();
+    this.mouse.mouse.onDown.add(() => {
+        this.menu.destroy();
     });
 };

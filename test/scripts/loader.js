@@ -204,7 +204,7 @@ function Loader (relpath, game, scope) {
         var game = this.game;
 
         this.items = {
-            candy: new Candy(game, this.textures.candy, inventory, this.scope),
+            candy: new Candy(game, this.textures.candy, inventory, this.scope, "C.A.L.E"),
             gold_dust: new Dust(game, this.textures.gold_bunny, inventory, "gold"),
             purple_dust: new Dust(game, this.textures.purple_bunny, inventory, "purple"),
             lemon: new Lemon(game, this.textures.lemondrops, inventory),

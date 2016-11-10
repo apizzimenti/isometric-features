@@ -1,5 +1,3 @@
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 7/21/16.
@@ -76,8 +74,8 @@ function Guide(element, gameElement, buttonOptions, menuStyles) {
     this.raw.on = false;
     this.raw.guide.styles = menuStyles || null;
 
-    $(document).ready(function () {
-        _this.guideElement = $("#" + element);
+    $(document).ready(() => {
+        _this.guideElement = $(`#${ element }`);
 
         _this._configureWindow();
         _this._button();
@@ -99,7 +97,7 @@ Guide.prototype._button = function () {
     var button = document.createElement("button"),
         buttonText = document.createTextNode(this.raw.buttonOptions.text || "i"),
         id = "guideButton",
-        template = "#" + id,
+        template = `#${ id }`,
         _this = this;
 
     button.id = id;
@@ -139,16 +137,16 @@ Guide.prototype._button = function () {
         }
     });
 
-    $(template).click(function () {
+    $(template).click(() => {
 
         if (!_this.raw.guideButton.on) {
             _this.raw.guideButton.on = true;
-            $("#" + _this.raw.guideId).css({
+            $(`#${ _this.raw.guideId }`).css({
                 "display": "block"
             });
         } else {
             _this.raw.guideButton.on = false;
-            $("#" + _this.raw.guideId).css({
+            $(`#${ _this.raw.guideId }`).css({
                 "display": "none"
             });
         }
@@ -167,8 +165,8 @@ Guide.prototype._button = function () {
 
 Guide.prototype._configureWindow = function () {
 
-    var template = "#" + this.raw.guideId,
-        offset = $("#" + this.raw.canvasId).offset(),
+    var template = `#${ this.raw.guideId }`,
+        offset = $(`#${ this.raw.canvasId }`).offset(),
         canvas = this.raw.canvas,
         w = canvas.width / 2,
         h = canvas.height / 2,

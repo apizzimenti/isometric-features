@@ -161,13 +161,12 @@ Inventory.prototype.addItem = function (item) {
  */
 
 Inventory.prototype.addItems = function (items) {
-    var _this2 = this;
 
     if (!Array.isArray(items)) {
         throw new Error("Use addItem(item) for single items.");
     } else {
-        items.forEach(function (item) {
-            _this2.addItem(item);
+        items.forEach(item => {
+            this.addItem(item);
         });
     }
 };
@@ -185,20 +184,19 @@ Inventory.prototype.addItems = function (items) {
  */
 
 Inventory.prototype._onClick = function () {
-    var _this3 = this;
 
-    this.game.input.onDown.add(function () {
-        if (_this3.mouse.switch) {
-            _this3._placeItem();
+    this.game.input.onDown.add(() => {
+        if (this.mouse.switch) {
+            this._placeItem();
         } else {
-            _this3._click();
+            this._click();
         }
     });
 
-    this.escape.onDown.add(function () {
-        _this3.mouse.switch = false;
-        _this3.mouse.reset();
-        _this3._reset();
+    this.escape.onDown.add(() => {
+        this.mouse.switch = false;
+        this.mouse.reset();
+        this._reset();
     });
 };
 
@@ -263,12 +261,11 @@ Inventory.prototype._click = function () {
  */
 
 Inventory.prototype._reset = function () {
-    var _this4 = this;
 
-    this.menuGroup.forEach(function (item) {
+    this.menuGroup.forEach(item => {
         item.input.useHandCursor = true;
         item.tint = 0xFFFFFF;
-        _this4.itemCache[item.key].text.tint = 0xFFFFFF;
+        this.itemCache[item.key].text.tint = 0xFFFFFF;
 
         if (item.clicked) {
             item.clicked = false;
@@ -295,7 +292,7 @@ Inventory.prototype._placeItem = function () {
         item = this.currentItem,
         key = item.key,
         tile = this.mouse.tile,
-        message = "Sorry, you can't place the " + key + " there. Choose a place that you've already seen!",
+        message = `Sorry, you can't place the ${ key } there. Choose a place that you've already seen!`,
         row,
         col;
 
