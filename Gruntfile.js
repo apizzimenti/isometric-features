@@ -103,5 +103,5 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-wiredep");
 
     // Default task
-    grunt.registerTask('default', ["wiredep", "includeSource", "concat", "uglify"]);
+    grunt.registerTask('default', ["wiredep", "includeSource", "concat"]);
 };
