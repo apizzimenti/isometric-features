@@ -152,6 +152,7 @@ function Loader (relpath, game, scope) {
         player = new Player(game, 7, 7, this.textures.astronaut, group, map, null, false);
         player.addIntro(init, tween);
         player.create();
+
         // load Animal sprites
 
         for (var i = 0; i < 6; i++) {

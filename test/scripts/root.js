@@ -48,10 +48,8 @@ var isogame = function (scope, injector) {
             game.debug.renderShadow = false;
             game.stage.disableVisibilityChange = true;
 
-            /*
-            set the world bounds; these aren't the bounds of the physics system, but are larger than the game window
-            so the camera follows the Player
-            */
+            // set the world bounds; these aren't the bounds of the physics system, but are larger than the game window
+            // so the camera follows the Player
     
             this.game.world.setBounds(0, 0, 2400, 2400);
 
@@ -115,11 +113,9 @@ var isogame = function (scope, injector) {
                 }
             );
 
-            /*
-            this allows the game to be accessed from outside this file; when a new game is created in the angular
-            portion of this app, each of its properties can be accessed. New sprites, items, messages, and lots more
-            can be added or modified
-            */
+            // this allows the game to be accessed from outside this file; when a new game is created in the angular
+            // portion of this app, each of its properties can be accessed. New sprites, items, messages, and lots more
+            // can be added or modified
             
             that.assign = function () {
                 that.debug = debug;
@@ -160,12 +156,11 @@ var isogame = function (scope, injector) {
             if (mouse.switch) {
                 mouse.selected();
             }
-            
-            /*
-            if the Scanner has been selected from the Inventory, make sure it's turned on and its direction is changed
-            when the scroll wheel is rotated. After it's fully set, load the Animal array into the Scanner so it knows
-            when to take pictures
-             */
+
+            // if the Scanner has been selected from the Inventory, make sure it's turned on and its direction is changed
+            // when the scroll wheel is rotated. After it's fully set, load the Animal array into the Scanner so it knows
+            // when to take pictures
+
 
             if (load.items.scanner.setting) {
                 direction(load.items.scanner);
