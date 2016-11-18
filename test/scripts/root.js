@@ -154,7 +154,9 @@ var isogame = function (scope, injector) {
             mouse.update();
 
             if (mouse.switch) {
-                mouse.selected();
+                mouse.selected({
+                    tint: 0xFF0000
+                });
             }
 
             // if the Scanner has been selected from the Inventory, make sure it's turned on and its direction is changed
