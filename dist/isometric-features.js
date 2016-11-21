@@ -1,4 +1,4 @@
-/*! isometric-features - v0.0.1 - 2016-11-14
+/*! isometric-features - v0.0.1 - 2016-11-21
 * Copyright (c) 2016 ; Licensed MIT */
 (function () {})();
 /**
@@ -492,15 +492,32 @@ Debug.prototype._switch = function () {
  * @property mapTileKey {string[]} Will contain keys for tile sprites.
  * @property tween {array} Default tween settings.
  * @property paramNotExist {function} Global testing method for parameters.
+ * @property colorTween {function}
  */
 
 var Globals = {
-  anchor: [0.5, 0],
-  mapTileKey: [],
-  tween: [1000, Phaser.Easing.Linear.None, true, 0, 0, false],
-  paramNotExist: function (param, type) {
-    return typeof param !== type || param == undefined;
-  }
+    anchor: [0.5, 0],
+    mapTileKey: [],
+    tween: [1000, Phaser.Easing.Linear.None, true, 0, 0, false],
+
+    paramNotExist: function (param, type) {
+        return typeof param !== type || param == undefined;
+    },
+
+    colorTween: function (game, object, start, end, t) {
+
+        console.dir(object);
+
+        var blend = { step: 0 },
+            tween = game.add.tween(blend).to({ step: 100 }, t);
+
+        tween.onUpdateCallback(() => {
+            object.tint = Phaser.Color.interpolateColor(start, end, 100, Math.floor(blend.step), 1);
+        });
+
+        object.tint = start;
+        tween.start();
+    }
 };
 (function () {})();
 /**
@@ -585,54 +602,42 @@ Mouse.prototype.update = function () {
  *
  * @desc If the mouse is in selected mode (i.e. <code>switch</code> is true), this determines the tile to animate.
  *
- * @param [callback] {function} The function used to determine the tile's behavior when it's being hovered over on select.
- * @param [args] {Array}
+ * @param [animation] {Object} Container for custom mouse on-select animation.
+ *
+ * @example
+ * // values shown in this example animation object are the default values for the system
+ *
+ * var animation = {
+ *         tint: 0x98FB98,                                          // hexadecimal color
+ *         alpha: 1.3 + Math.sin(this.game.time.now * 0.007),       // value (or function) applied to tile transparency
+ *         tween: [{isoZ: 5}, 20, Phaser.Easing.Linear.None, true]  // tween arguments to modify tile physics properties
+ *     }
  *
  * @this Mouse
  */
 
-Mouse.prototype.selected = function (callback, args) {
+Mouse.prototype.selected = function (animation) {
 
-    if (this.inBounds) {
+    var notExist = Globals.paramNotExist(animation, "object");
+
+    if (notExist) if (this.inBounds) {
 
         this.group.forEach(tile => {
 
-            if (tile.type === "tile" && !callback) {
+            if (tile.type === "tile") {
 
                 var inside = tile.isoBounds.containsXY(this.threeD.x + this.map.tileSize, this.threeD.y + this.map.tileSize);
 
                 if (inside) {
 
-                    this.tile = tile;
+                    this.row = tile.row;
+                    this.col = tile.col;
 
-                    this.row = this.tile.row;
-                    this.col = this.tile.col;
-
-                    tile.tint = 0x98FB98;
-                    tile.alpha = 1.3 + Math.sin(this.game.time.now * 0.007);
-
-                    this.tween = this.game.add.tween(tile).to({ isoZ: 5 }, 20, Phaser.Easing.Linear.None, true);
-                    this.tweened = true;
-                } else {
-
-                    if (this.tweened) {
-                        this.tween.stop();
-                        this.tweened = !this.tweened;
-                        tile.isoZ = 0;
-                    }
-
+                    tile.tint = notExist ? 0x98FB98 : animation.tint || 0x98FB98;
+                    tile.alpha = notExist ? 1.3 + Math.sin(this.game.time.now * 0.007) : animation.alpha || 1.3 + Math.sin(this.game.time.now * 0.007);
+                } else if (!inside) {
                     tile.discovered ? tile.tint = 0xFFFFFF : tile.tint = 0x571F57;
                     tile.alpha = 1;
-                }
-            } else {
-
-                if (Array.isArray(args)) {
-
-                    callback(tile, ...args);
-                } else {
-
-                    delete arguments[0];
-                    callback(tile, ...Array.from(arguments));
                 }
             }
         });
@@ -1047,7 +1052,9 @@ function createAnimals(scope, num, game, keys, group, map, species) {
  * @property inventorySprite {sprite} On initialization, this will contain a regular Phaser sprite.
  * @property sprite {sprite} On selected, this will contain an isometric Sprite.
  * @property sprite.tile {object} Contains location and directional information for the sprite.
+ * @property auto {boolean} Is this sprite automatically loaded?
  * @property direction {number} This sprite's default direction.
+ * @property location {number} When this item is selected, this is its index in the linked list of items.
  *
  * @class {object} Item
  * @this Item
@@ -1075,6 +1082,7 @@ function Item(game, key, inventory, name) {
     this.sprite.direction = 0;
     this.map = this.inventory.map;
     this.auto = true;
+    this.location = 0;
 }
 
 /**
@@ -1182,7 +1190,7 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
 
             tile.tint = this.fog ? 0x571F57 : 0xFFFFFF;
 
-            tile.discovered = this.fog ? false : true;
+            tile.discovered = !this.fog;
             tile.type = "tile";
 
             tile.anchor.set(0.5, 1);
@@ -1535,6 +1543,9 @@ Guide.prototype._configureWindow = function () {
  * @property menuGroup {object} Menu sprite group.
  * @property itemGroup {object} Isometric sprite group.
  *
+ * @property itemList {sList} Singly linked list of the items in the inventory.
+ * @property itemCache {
+ *
  * @property area {object} Total space allocated to Inventory module.
  * @property area.width {number} Width of Inventory module space.
  * @property area.height {number} Height of Inventory module space.
@@ -1552,7 +1563,6 @@ Guide.prototype._configureWindow = function () {
  * @see Message
  *
  * @todo implement tooltip stuff.
- * @todo when items have been removed, add new items to the first null space
  */
 
 function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
@@ -1565,9 +1575,7 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
     this.times = 0;
     this.map = map;
 
-    this.items = [];
     this.itemCache = {};
-    this.itemsRow = [];
 
     var graphics = game.add.graphics(0, 0),
         menuGroup = game.add.group(),
@@ -1575,9 +1583,6 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
         areaHeight = 300,
         elementWidth = 65,
         elementHeight = 60;
-
-    this.i = areaHeight;
-    this.j = areaWidth;
 
     menuGroup.fixedToCamera = true;
     menuGroup.enableBody = true;
@@ -1589,6 +1594,8 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
     graphics.beginFill(0xFF0000, 0.3);
     graphics.drawRect(this.width - areaWidth, this.height - areaHeight, areaWidth, areaHeight);
     this.graphics = graphics;
+
+    this.itemList = new f.LinkedList([]);
 
     this.area = {};
     this.area.width = areaWidth;
@@ -1611,48 +1618,60 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
  *
  * @desc Adds an item to the inventory.
  *
- * @param item {Item} Item to be added.
+ * @param item {Item} Item to be added
  */
 
 Inventory.prototype.addItem = function (item) {
+    this.itemList.push(item);
+};
 
-    var w = this.element.width,
-        h = this.element.height,
-        x = this.width - this.j,
-        y = this.height - this.i,
-        name = item.name;
+Inventory.prototype._refit = function () {
 
-    item.inventorySprite = this.game.add.sprite(x, y, item.key, null, this.menuGroup);
-    item.inventorySprite.width = w;
-    item.inventorySprite.height = h;
+    // remove all existing children from the group so each can be repositioned
+    this.menuGroup.removeAll(true);
 
-    item.inventorySprite.row = (this.area.height - this.i) / h;
-    item.inventorySprite.col = (this.area.width - this.j) / w;
+    var perRow = this.area.width / this.element.width,
+        items = f.group(this.itemList.toArray(), perRow),
+        item,
+        x = this.width - this.area.width,
+        y = this.height - this.area.height,
+        w = this.element.width,
+        h = this.element.height;
 
-    item.inventorySprite.inputEnabled = true;
-    item.inventorySprite.input.useHandCursor = true;
+    for (var i = 0; i < items.length; i++) {
 
-    item.text = this.game.add.text(x, y, name, {
-        font: "Courier",
-        fontSize: 12,
-        fill: "white"
-    });
+        var group = items[i];
 
-    item.text.fixedToCamera = true;
+        for (var j = 0; j < items[i].length; j++) {
 
-    this.j -= w;
-    this.itemsRow.push(item);
-    this.items[item.inventorySprite.row] = this.itemsRow;
-    this.itemCache[item.key] = item;
+            item = group[j];
 
-    if (this.j === 0) {
+            // create sprite at specified (x, y) coordinate pair
+            item.inventorySprite = this.game.add.sprite(x, y, item.key, null, this.menuGroup);
 
-        this.i -= h;
-        this.j = this.area.width;
-        this.items[item.inventorySprite.row + 1] = [];
-        this.itemsRow = [];
-    } else if (this.i === 0) {
-        throw new RangeError("Number of sprites exceeds the number of available tiles.");
+            // force width/height
+            item.inventorySprite.width = w;
+            item.inventorySprite.height = h;
+
+            // enable input to use hand cursor for selection
+            item.inventorySprite.inputEnabled = true;
+            item.inventorySprite.input.useHandCursor = true;
+
+            // add text
+            item.text = this.game.add.text(x, y, name, {
+                font: "Courier",
+                fontSize: 12,
+                fill: "white"
+            });
+
+            // cache this item so it can be refitted later
+            this.itemCache[item.key] = item;
+
+            x += w;
+        }
+
+        x = this.width - this.area.width;
+        y += h;
     }
 };
 
@@ -1678,6 +1697,8 @@ Inventory.prototype.addItems = function (items) {
             this.addItem(item);
         });
     }
+
+    this._refit();
 };
 
 /**
@@ -1737,11 +1758,13 @@ Inventory.prototype._click = function () {
 
         var col = Math.floor(relativeX / this.element.width),
             row = Math.floor(relativeY / this.element.height),
-            item;
+            loc = col + (row > 0 ? row * (this.area.height / this.element.height) - 1 : 0),
+            item,
+            items = this.itemList.toArray();
 
-        if (this.items[row][col]) {
+        if (items[loc]) {
 
-            item = this.items[row][col];
+            item = items[loc];
 
             if (this.currentItem) {
                 this.currentItem.inventorySprite.tint = 0xFFFFFF;
@@ -1755,6 +1778,7 @@ Inventory.prototype._click = function () {
             item.text.tint = 0xFFDD00;
 
             this.currentItem = item;
+            this.currentItem.location = loc;
         }
     }
 };
@@ -1801,14 +1825,9 @@ Inventory.prototype._placeItem = function () {
         item = this.currentItem,
         key = item.key,
         tile = this.mouse.tile,
-        message = `Sorry, you can't place the ${ key } there. Choose a place that you've already seen!`,
-        row,
-        col;
+        message = `Sorry, you can't place the ${ key } there. Choose a place that you've already seen!`;
 
     if (tile.discovered && isInBounds(this.mouse)) {
-
-        row = item.inventorySprite.row;
-        col = item.inventorySprite.col;
 
         item.sprite = this.game.add.isoSprite(x, y, 0, key, null, this.itemGroup);
         item.threeDInitialize();
@@ -1817,9 +1836,11 @@ Inventory.prototype._placeItem = function () {
         item.inventorySprite.destroy();
         item.text.destroy();
 
-        this.items[row][col] = null;
+        this.itemList.remove(this.currentItem.location);
         this.mouse.reset();
         this.mouse.switch = false;
+
+        this._refit();
     } else {
         this.messages.add(message);
     }

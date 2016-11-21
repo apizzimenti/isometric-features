@@ -81,54 +81,42 @@ Mouse.prototype.update = function () {
  *
  * @desc If the mouse is in selected mode (i.e. <code>switch</code> is true), this determines the tile to animate.
  *
- * @param [callback] {function} The function used to determine the tile's behavior when it's being hovered over on select.
- * @param [args] {Array}
+ * @param [animation] {Object} Container for custom mouse on-select animation.
+ *
+ * @example
+ * // values shown in this example animation object are the default values for the system
+ *
+ * var animation = {
+ *         tint: 0x98FB98,                                          // hexadecimal color
+ *         alpha: 1.3 + Math.sin(this.game.time.now * 0.007),       // value (or function) applied to tile transparency
+ *         tween: [{isoZ: 5}, 20, Phaser.Easing.Linear.None, true]  // tween arguments to modify tile physics properties
+ *     }
  *
  * @this Mouse
  */
 
-Mouse.prototype.selected = function (callback, args) {
+Mouse.prototype.selected = function (animation) {
 
-    if (this.inBounds) {
+    var notExist = Globals.paramNotExist(animation, "object");
+
+    if (notExist) if (this.inBounds) {
 
         this.group.forEach(tile => {
 
-            if (tile.type === "tile" && !callback) {
+            if (tile.type === "tile") {
 
                 var inside = tile.isoBounds.containsXY(this.threeD.x + this.map.tileSize, this.threeD.y + this.map.tileSize);
 
                 if (inside) {
 
-                    this.tile = tile;
+                    this.row = tile.row;
+                    this.col = tile.col;
 
-                    this.row = this.tile.row;
-                    this.col = this.tile.col;
-
-                    tile.tint = 0x98FB98;
-                    tile.alpha = 1.3 + Math.sin(this.game.time.now * 0.007);
-
-                    this.tween = this.game.add.tween(tile).to({ isoZ: 5 }, 20, Phaser.Easing.Linear.None, true);
-                    this.tweened = true;
-                } else {
-
-                    if (this.tweened) {
-                        this.tween.stop();
-                        this.tweened = !this.tweened;
-                        tile.isoZ = 0;
-                    }
-
+                    tile.tint = notExist ? 0x98FB98 : animation.tint || 0x98FB98;
+                    tile.alpha = notExist ? 1.3 + Math.sin(this.game.time.now * 0.007) : animation.alpha || 1.3 + Math.sin(this.game.time.now * 0.007);
+                } else if (!inside) {
                     tile.discovered ? tile.tint = 0xFFFFFF : tile.tint = 0x571F57;
                     tile.alpha = 1;
-                }
-            } else {
-
-                if (Array.isArray(args)) {
-
-                    callback(tile, ...args);
-                } else {
-
-                    delete arguments[0];
-                    callback(tile, ...Array.from(arguments));
                 }
             }
         });
