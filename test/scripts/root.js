@@ -2,14 +2,16 @@
  * Created by apizzimenti on 5/12/16.
  */
 
+/**
+ * This gamefile essentially uses the same organization as the phaser-isometric-plugin does
+ */
+
 "use strict";
 
 var isogame = function (scope, injector) {
-    
-    /*
-    Getting the window's width; originially, I preserved the dimensions with some golden ratio magic, but the rest of
-    the game has a 1024x768 window. Conformity!
-     */
+
+    // Getting the window's width; originially, I preserved the dimensions with some golden ratio magic, but the rest of
+    // the game has a 1024x768 window. Conformity!
 
     var orig_width = window.innerWidth / (1.68 * 0.5),
         orig_height = window.innerHeight / (1.68 * 0.5),
@@ -17,51 +19,35 @@ var isogame = function (scope, injector) {
         height = 768,
         game = new Phaser.Game(width, height, Phaser.CANVAS, "gameCanvas", null, true, false),
         
-    // Empty variables for the two groups: the tile group and the character group.
-        groundTiles,
-        characters,
-        
     // I have a player variable and a container for all the Animals.
-        player,
-        creatures = [],
         sprites,
         
     // relpath is the path to all the assets (images, tilemaps, etc.) that gets passed to the loader.
-        
         relpath = "./assets/",
         load = new Loader(relpath, game, scope),
 
     // the default tile size, and containers for the Inventory, Map, Mouse, and Debug classes, as well as keydowns and
     // preserving the lexical "this"
-
         tileSize = 32,
         inventory,
         map,
         mouse,
         debug,
         escape,
-        that = this;
+        that = this,
+
+        // initialize the
+        system = new System(game, scope);
     
     var boot = {
+
         preload: function () {
-            game.time.advancedTiming = true;
-            game.debug.renderShadow = false;
-            game.stage.disableVisibilityChange = true;
 
-            // set the world bounds; these aren't the bounds of the physics system, but are larger than the game window
-            // so the camera follows the Player
-    
-            this.game.world.setBounds(0, 0, 2400, 2400);
+            // preload; this is provided by the isometric-features plugin
+            system.preload();
 
-            // add the isometric plugin
-            game.plugins.add(new Phaser.Plugin.Isometric(game));
-
-            // load assets (images, tilemap, textures, etc)
+            // load assets (images, tilemap, textures, etc); the Loader class is built for this specific game instance
             load.assets();
-
-            // start the physics system and set the anchor for the game
-            game.physics.startSystem(Phaser.Plugin.Isometric.ISOARCADE);
-            game.iso.anchor.setTo(...Globals.anchor);
         },
 
         create: function () {
@@ -72,34 +58,22 @@ var isogame = function (scope, injector) {
             
             debug = new Debug(game);
 
-            // new group for tiles
-            groundTiles = game.add.group();
-            groundTiles.enableBody = true;
-            groundTiles.physicsBodyType = Phaser.Plugin.Isometric.ISOARCADE;
-
-            // new group for moving sprites
-            characters = game.add.group();
-            characters.enableBody = true;
-            characters.physicsBodyType = Phaser.Plugin.Isometric.ISOARCADE;
-
             // create a new map with fog of war on, a randomly generated tilemap.
-            map = new Map(game, groundTiles, "tileset", tileSize, 15);
+            map = new Map(game, system.tiles, "tileset", tileSize, 15);
 
-            // load the sprites (Animals, Player(s)) and assign them to their containers
-            sprites = load.sprites(map, characters);
-            player = sprites.player;
-            creatures = sprites.creatures;
+            // load the sprites (Animals, Player(s))
+            sprites = load.sprites(map, system.characters);
 
             // set up the Mouse
-            mouse = new Mouse(game, map, groundTiles);
+            mouse = new Mouse(game, map, system.tiles);
 
-            // set up key tracking
-            keys = keymap(game, this);
+            // set up key tracking for inventory
+            keys = system.keymap(game, this);
             escape = keys.esc;
             space = keys.space;
 
             // create the Inventory system and load items into it
-            inventory = new Inventory(game, map, mouse, escape, characters, "top_right");
+            inventory = new Inventory(game, map, mouse, escape, system.characters, "top_right");
             load.inventory(inventory, space);
             
             // create a guide
@@ -113,7 +87,7 @@ var isogame = function (scope, injector) {
                 }
             );
 
-            // this allows the game to be accessed from outside this file; when a new game is created in the angular
+            // this allows the game to be accessed from outside the game instance; when a new game is created in the angular
             // portion of this app, each of its properties can be accessed. New sprites, items, messages, and lots more
             // can be added or modified
             
@@ -121,64 +95,38 @@ var isogame = function (scope, injector) {
                 that.debug = debug;
                 that.map = map;
                 that.mouse = mouse;
-                that.player = player;
+                that.player = sprites.player;
                 that.inventory = inventory;
                 that.messages = inventory.messages;
             };
 
             // assigns objects to game properties and fires the "load" event out to Angular so it knows we're ready
             that.assign();
-            load.onLoad();
             scope.$emit("load");
-
         },
 
         update: function () {
 
-            // collision physics
-            // game.physics.isoArcade.collide(characters);
-            game.iso.simpleSort(characters);
-
-            // keep track of the Player's direction, keymapping, and restrict the vision radius
-            direction(player);
-            keymapTrack(player, this);
-            player.visionRadius();
-
-            // keep track of each Animal's direction
-            creatures.forEach((creature) => {
-                direction(creature);
-                creature.isVisible(player);
-            });
-
-            // mouse tracking; if the mouse switch is ON, make sure the tiles are glowing
-            mouse.update();
-
-            if (mouse.switch) {
-                mouse.selected({
-                    tint: 0xFF0000
-                });
-            }
+            // load system defaults;
+            system.update(this, system.characters, sprites.player, sprites.creatures, mouse);
 
             // if the Scanner has been selected from the Inventory, make sure it's turned on and its direction is changed
             // when the scroll wheel is rotated. After it's fully set, load the Animal array into the Scanner so it knows
             // when to take pictures
-
-
             if (load.items.scanner.setting) {
                 direction(load.items.scanner);
                 load.items.scanner.setRadius();
             } else if (load.items.scanner.scanning) {
-                load.items.scanner.pictures(creatures);
+                load.items.scanner.pictures(sprites.creatures);
                 load.items.scanner.tiles();
             }
-
         },
 
         render: function () {
 
-            // debug usually goes here
-            debug.sprite(creatures);
-            debug.sprite(player);
+            // debug usually goes here; ENTIRELY OPTIONAL
+            debug.sprite(sprites.creatures);
+            debug.sprite(sprites.player);
             debug.fps();
             debug.mousePos(mouse);
 

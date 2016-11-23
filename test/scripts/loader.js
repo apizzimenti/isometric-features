@@ -51,10 +51,9 @@ function Loader (relpath, game, scope) {
         // load the tileset textures
         game.load.atlasJSONHash("tileset", relpath + "tileset.png", relpath + "tileset.json");
 
-        /*
-        load the textures for the Astronaut, Blogg, Galoot, Kangaram, and Camera and put them into arrays that correspond
-        to the game directions; SE -> NE -> NW -> SW
-         */
+
+        // load the textures for the Astronaut, Blogg, Galoot, Kangaram, and Camera and put them into arrays that correspond
+        // to the game directions; SE -> NE -> NW -> SW
         game.load.image("astronaut_NE", relpath + "Astronaut/astronaut_NE.png");
         game.load.image("astronaut_NW", relpath + "Astronaut/astronaut_NW.png");
         game.load.image("astronaut_SE", relpath + "Astronaut/astronaut_SE.png");
@@ -142,12 +141,9 @@ function Loader (relpath, game, scope) {
                 easing: Phaser.Easing.Quintic.Out
             };
 
-        // load Player sprite
-        
-        /*
-        since the Player sprite needs an intro animation, I pass false into the auto parameter
-        and call Player.addIntro(), then Player.create().
-         */
+        // load Player sprite;
+        // since the Player sprite needs an intro animation, I pass false into the auto parameter
+        // and call Player.addIntro(), then Player.create().
 
         player = new Player(game, 7, 7, this.textures.astronaut, group, map, null, false);
         player.addIntro(init, tween);
@@ -234,22 +230,4 @@ function Loader (relpath, game, scope) {
      * @this Loader
      */
 
-    this.onLoad = function () {
-
-        this.scope.$on("load", (e) => {
-
-            var host = window.location.origin + "/",
-                docs = "http://myweb.uiowa.edu/apizzimenti",
-                game = "#/minigame";
-
-            console.log("%c PlanetZ Documentation " + `%c ${docs}`,
-                "background: #00A6F9; color: #FFF",
-                "color: #5D5D5D");
-
-            console.log("%c ¿Do you want to play a game? " + `%c ${host + game}`,
-                "background: #981212; color: #FFF",
-                "color: #5D5D5D");
-
-        });
-    }
 }
