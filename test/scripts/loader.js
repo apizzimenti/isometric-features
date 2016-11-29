@@ -220,14 +220,4 @@ function Loader (relpath, game, scope) {
             this.items.scanner
         ]);
     };
-
-    /**
-     * @author Anthony Pizzimenti
-     *
-     * @desc Shoots some messages into the console when the game load event fires.
-     *
-     * @method
-     * @this Loader
-     */
-
 }
