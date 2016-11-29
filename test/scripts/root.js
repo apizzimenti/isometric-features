@@ -59,7 +59,7 @@ var isogame = function (scope, injector) {
             debug = new Debug(game);
 
             // create a new map with fog of war on, a randomly generated tilemap.
-            map = new Map(game, system.tiles, "tileset", tileSize, 15);
+            map = new Map(game, system.tiles, "tileset", tileSize, 15, null, true);
 
             // load the sprites (Animals, Player(s))
             sprites = load.sprites(map, system.characters);
