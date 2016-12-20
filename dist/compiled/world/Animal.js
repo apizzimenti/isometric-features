@@ -76,19 +76,34 @@ function Animal(game, scope, row, col, keys, group, map, species, scale, auto) {
     var x = row * map.tileSize,
         y = col * map.tileSize;
 
+    // add isometric sprite
     this.sprite = this.game.add.isoSprite(x, y, 0, keys[0], null, group);
+
+    // this object will be tied to the sprite; contains all tile information
     this.sprite.tile = {};
+
+    // set anchor, enable physics, enable body
     this.sprite.anchor.set(...Globals.anchor);
     this.game.physics.isoArcade.enable(this.sprite);
     this.sprite.enableBody = true;
+
+    // object will collide world bounds
     this.sprite.body.collideWorldBounds = true;
+
+    // if fog of war is turned on, then sprite is invisible
     this.sprite.visible = !this.map.fog;
+
+    // set object scale
     this.sprite.scale.setTo(...this.scale);
 
+    // initialize sprite scanned value
     this.scanned = false;
+
+    // handler for scanning
     this.scan = new Phaser.Signal();
     this.listen();
 
+    // determine the direction of the sprite
     direction(this);
 }
 
@@ -106,22 +121,29 @@ Animal.prototype.isVisible = function (Player) {
 
     if (Player.auto) {
 
+        // current player position
         var pRow = Player.row,
             pCol = Player.col,
-            row = this.sprite.row,
+
+
+        // current animal position
+        row = this.sprite.row,
             col = this.sprite.col,
-            inRow = row >= pRow - 1 && row <= pRow + 1,
+
+
+        // is the animal sprite within a one-tile radius of the player?
+        inRow = row >= pRow - 1 && row <= pRow + 1,
             inCol = col >= pCol - 1 && col <= pCol + 1;
 
         if (inRow && inCol) {
+            // if yes, make the sprite visible
             this.sprite.visible = true;
         }
 
+        // if this animal sprite returns to a discovered tile, then make it visible again
         this.sprite.tile.center.discovered ? this.sprite.visible = true : this.sprite.visible = false;
     }
 };
-
-Animal.prototype._instantiate = function () {};
 
 /**
  * @author Anthony Pizzimenti
@@ -134,7 +156,7 @@ Animal.prototype._instantiate = function () {};
  *
  * @this Animal
  *
- * @see manipulateDirection
+ * @see forceDirection
  */
 
 Animal.prototype.timedMovement = function () {
@@ -146,7 +168,7 @@ Animal.prototype.timedMovement = function () {
     this.loopedMovement = this.game.time.events.loop(Phaser.Timer.SECOND * 3 + this.rand, () => {
         dir = Math.floor(Math.random() * 4);
         this.rand = Math.random() * 3;
-        manipulateDirection(this, dir);
+        forceDirection(this, dir);
     });
 };
 
@@ -199,7 +221,7 @@ Animal.prototype._pathfind = function (itemRow, itemCol) {
             console.log("path not found");
         } else {
             this.game.time.events.remove(this.loopedMovement);
-            dirs = determineDirections(path);
+            dirs = shrinkPath(path);
             resetSprite(this, true);
             this._followDirection(true, path, dirs);
         }
@@ -226,8 +248,12 @@ Animal.prototype._pathfind = function (itemRow, itemCol) {
 
 Animal.prototype._followDirection = function (begin, path, dirs) {
 
+    // dimensisons of map tiles
     var dim = this.map.tileSize,
-        r = path[0].x,
+
+
+    // get the next direction on the path, then map coordinates for direction
+    r = path[0].x,
         c = path[0].y,
         x = r * dim,
         y = c * dim,
@@ -235,6 +261,7 @@ Animal.prototype._followDirection = function (begin, path, dirs) {
         end = dirs.length === 0 || path.length === 1;
 
     if (begin) {
+
         this.sprite.tween = this.game.add.tween(this.sprite).to({ isoX: x, isoY: y }, ...Globals.tween);
 
         this.sprite.tween.onComplete.add(() => {
@@ -245,6 +272,7 @@ Animal.prototype._followDirection = function (begin, path, dirs) {
             this._followDirection(false, path, dirs);
         });
     } else if (!begin && !end) {
+
         tween = this.game.add.tween(this.sprite);
         this.sprite.tween.chain(tween.to({ isoX: x, isoY: y }, ...Globals.tween));
 
@@ -256,6 +284,7 @@ Animal.prototype._followDirection = function (begin, path, dirs) {
             this._followDirection(false, path, dirs);
         });
     } else if (!begin && end) {
+
         resetSprite(this, false);
         this.timedMovement();
     }

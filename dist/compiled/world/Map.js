@@ -46,7 +46,12 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
     this.tileSize = tileSize;
     this.mapSize = mapSize;
     this.group = group;
-    this.fog = fog;
+
+    if (!Globals.paramNotExist(fog)) {
+        this.fog = false;
+    } else {
+        this.fog = fog;
+    }
 
     if (atlas_json_exists) {
         this._generateMapKeys();

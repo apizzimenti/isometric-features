@@ -33,11 +33,14 @@ function Mouse(game, map, group) {
     this.game = game;
     this.map = map;
     this.group = group;
+
+    // create a new Point3 to project 2d position onto isometric map
     this.pos = new Phaser.Plugin.Isometric.Point3();
 
     var x = this.game.input.mousePointer.x,
         y = this.game.input.mousePointer.y;
 
+    // note 2d and 3d points
     this.twoD = new Phaser.Point(x, y);
     this.threeD = this.game.iso.unproject(this.twoD, this.pos);
 
@@ -73,6 +76,7 @@ Mouse.prototype.update = function () {
         frontX = this.game.physics.isoArcade.bounds.frontX,
         frontY = this.game.physics.isoArcade.bounds.frontY;
 
+    // assigns inBounds property to check if mouse is within physics world bounds.
     this.inBounds = this.threeD.x > backX && this.threeD.x < frontX && this.threeD.y > backY && this.threeD.y < frontY;
 };
 
@@ -88,7 +92,7 @@ Mouse.prototype.update = function () {
  *
  * var animation = {
  *         tint: 0x98FB98,                                          // hexadecimal color
- *         alpha: 1.3 + Math.sin(this.game.time.now * 0.007),       // value (or function) applied to tile transparency
+ *         alpha: 1.3 + Math.sin(this.game.time.now * 0.007),       // value applied to tile transparency
  *         tween: [{isoZ: 5}, 20, Phaser.Easing.Linear.None, true]  // tween arguments to modify tile physics properties
  *     }
  *
@@ -99,7 +103,7 @@ Mouse.prototype.selected = function (animation) {
 
     var notExist = Globals.paramNotExist(animation, "object");
 
-    if (notExist) if (this.inBounds) {
+    if (this.inBounds) {
 
         this.group.forEach(tile => {
 
@@ -108,6 +112,8 @@ Mouse.prototype.selected = function (animation) {
                 var inside = tile.isoBounds.containsXY(this.threeD.x + this.map.tileSize, this.threeD.y + this.map.tileSize);
 
                 if (inside) {
+
+                    this.tile = tile;
 
                     this.row = tile.row;
                     this.col = tile.col;

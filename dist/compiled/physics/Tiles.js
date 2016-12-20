@@ -41,28 +41,45 @@ function direction(Sprite) {
  * @param Sprite {Animal | Player | Item} Object containing a Phaser isometric sprite.
  *
  * @private
+ *
+ * @see determineTileRadius
  */
 
 function _assignDirection(Sprite) {
 
     var sprite = Sprite.sprite,
-        x = sprite.body.frontX,
+
+
+    // gets front (x, y) coordinates of sprite wireframe
+    x = sprite.body.frontX,
         y = sprite.body.frontY,
         tileMap = Sprite.map.tileMap,
         tileSize = Sprite.map.tileSize,
-        row = Math.ceil(x / tileSize) >= tileMap.length - 1 ? tileMap.length - 1 : Math.ceil(x / tileSize),
+
+
+    // calculates sprite row/column position; if (x, y) pair is out of world bounds, force it to the nearest row/column
+    row = Math.ceil(x / tileSize) >= tileMap.length - 1 ? tileMap.length - 1 : Math.ceil(x / tileSize),
         col = Math.ceil(y / tileSize) >= tileMap[0].length - 1 ? tileMap[0].length - 1 : Math.ceil(y / tileSize),
         dir = sprite.direction,
-        r = determineTileRadius(tileMap.length, row),
+
+
+    // returns adjusted position values for calculating vision radius
+    r = determineTileRadius(tileMap.length, row),
         c = determineTileRadius(tileMap[0].length, col),
-        rp = r.p,
+
+
+    // adjusted position values for vision radius
+    rp = r.p,
         rm = r.m,
         cp = c.p,
         cm = c.m;
 
+    // assigns sprite row, column properties
     sprite.row = row;
     sprite.col = col;
 
+    // finds the tile at the center of the sprite's hitwireframebox
+    // (I asked my girlfriend to help me choose between "wireframe" and "hitbox" and she came up with "hitwireframebox", so)
     sprite.tile.center = tileMap[row][col];
 
     switch (dir) {
@@ -99,6 +116,7 @@ function _assignDirection(Sprite) {
             break;
     }
 
+    // loads the correct texture based on the sprite's direction
     sprite.loadTexture(Sprite.keys[dir]);
 }
 
@@ -127,15 +145,16 @@ function determineTileRadius(length, dim) {
  * @desc Takes in a sprite and a direction number, and sets the velocity accordingly.
  *
  * @param sprite {Player | Animal} Sprite's parent.
- * @param d {number} Randomized direction.
+ * @param direction {number} Direction.
  */
 
-function manipulateDirection(sprite, d) {
+function forceDirection(sprite, direction) {
 
     var speed = 20,
         s = sprite.sprite;
 
-    switch (d) {
+    // forces velocity in a given direction
+    switch (direction) {
         case 0:
             s.body.velocity.x = speed;
             s.body.velocity.y = 0;
@@ -176,7 +195,7 @@ function manipulateDirection(sprite, d) {
  * @returns {number[]} The directions, in succession, that the sprite will be facing on this path.
  */
 
-function determineDirections(path) {
+function shrinkPath(path) {
 
     var x,
         y,
@@ -193,6 +212,8 @@ function determineDirections(path) {
             x_1 = path[i + 1].x;
             y_1 = path[i + 1].y;
 
+            // each number pushed into last[] describes a direction; compares current and next instruction to
+            // determine direction
             if (x > x_1) {
                 last.push(2);
             } else if (x < x_1) {
@@ -218,7 +239,9 @@ function determineDirections(path) {
  */
 
 function resetSprite(sprite, body) {
+
     var s = sprite.sprite;
+
     s.body.velocity.x = 0;
     s.body.velocity.y = 0;
     s.direction = 0;

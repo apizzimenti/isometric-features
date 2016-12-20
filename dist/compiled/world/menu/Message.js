@@ -34,13 +34,16 @@ function Message(game, size, loc) {
     this.messages = [];
     this.loc = loc;
     this.fontSize = size;
+
     this.style = {
         font: size + "px Courier",
         fill: "#FFFFFF"
     };
 
+    // create Phaser signal dispatcher
     this.alert = new Phaser.Signal();
 
+    // instantiate new events
     this.alert.add(() => {
         this._display();
     });
@@ -76,19 +79,25 @@ Message.prototype.add = function (message) {
 
 Message.prototype._display = function () {
 
+    // correctly format message
     var str = this._format(this.messages[0]),
         tween;
 
+    // add message text
     this.text = this.game.add.text(str.x, str.y, str.msg, this.style);
 
     this.text.alpha = 0;
     this.text.fixedToCamera = true;
 
+    // tween the text in
     this.game.add.tween(this.text).to({ alpha: 1 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
 
     this.game.time.events.add(Phaser.Timer.SECOND * 3, () => {
+
+        // tween the text out
         tween = this.game.add.tween(this.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
 
+        // when the above tween is completed, reset the queue and dispactch the next message
         tween.onComplete.add(() => {
             this.messages = this.messages.slice(1, this.messages.length);
             if (this.messages.length !== 0) {
