@@ -21,6 +21,7 @@
   "scripts": {
     "prebuild": "rimraf dist/**/* ../isometric-features-docs/**/*",
     "build": "babel lib --out-dir dist/compiled",
-    "postbuild": "jsdoc -c ~/desktop/isometric-features/jsdoc.json && grunt"
+    "postbuild": "jsdoc -c ~/desktop/isometric-features/jsdoc.json && grunt",
+    "docs": "jsdoc -c ~/desktop/isometric-features/jsdoc.json"
   }
 }
