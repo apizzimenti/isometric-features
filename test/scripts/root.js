@@ -184,7 +184,6 @@ var isogame = function (scope, injector) {
             debug.sprite(player);
             debug.fps();
             debug.mousePos(mouse);
-
         }
     };
 
