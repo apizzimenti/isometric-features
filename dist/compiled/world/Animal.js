@@ -51,10 +51,7 @@
  * @see Map
  */
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function Animal(game, scope, row, col, keys, group, map, species, scale, auto) {
-    var _sprite$anchor, _sprite$scale;
 
     this.type = "animal";
     this.species = species || keys[0];
@@ -79,19 +76,34 @@ function Animal(game, scope, row, col, keys, group, map, species, scale, auto) {
     var x = row * map.tileSize,
         y = col * map.tileSize;
 
+    // add isometric sprite
     this.sprite = this.game.add.isoSprite(x, y, 0, keys[0], null, group);
+
+    // this object will be tied to the sprite; contains all tile information
     this.sprite.tile = {};
-    (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(Globals.anchor));
+
+    // set anchor, enable physics, enable body
+    this.sprite.anchor.set(...Globals.anchor);
     this.game.physics.isoArcade.enable(this.sprite);
     this.sprite.enableBody = true;
-    this.sprite.body.collideWorldBounds = true;
-    this.sprite.visible = !this.map.fog;
-    (_sprite$scale = this.sprite.scale).setTo.apply(_sprite$scale, _toConsumableArray(this.scale));
 
+    // object will collide world bounds
+    this.sprite.body.collideWorldBounds = true;
+
+    // if fog of war is turned on, then sprite is invisible
+    this.sprite.visible = !this.map.fog;
+
+    // set object scale
+    this.sprite.scale.setTo(...this.scale);
+
+    // initialize sprite scanned value
     this.scanned = false;
+
+    // handler for scanning
     this.scan = new Phaser.Signal();
     this.listen();
 
+    // determine the direction of the sprite
     direction(this);
 }
 
@@ -109,22 +121,29 @@ Animal.prototype.isVisible = function (Player) {
 
     if (Player.auto) {
 
+        // current player position
         var pRow = Player.row,
             pCol = Player.col,
-            row = this.sprite.row,
+
+
+        // current animal position
+        row = this.sprite.row,
             col = this.sprite.col,
-            inRow = row >= pRow - 1 && row <= pRow + 1,
+
+
+        // is the animal sprite within a one-tile radius of the player?
+        inRow = row >= pRow - 1 && row <= pRow + 1,
             inCol = col >= pCol - 1 && col <= pCol + 1;
 
         if (inRow && inCol) {
+            // if yes, make the sprite visible
             this.sprite.visible = true;
         }
 
+        // if this animal sprite returns to a discovered tile, then make it visible again
         this.sprite.tile.center.discovered ? this.sprite.visible = true : this.sprite.visible = false;
     }
 };
-
-Animal.prototype._instantiate = function () {};
 
 /**
  * @author Anthony Pizzimenti
@@ -137,20 +156,19 @@ Animal.prototype._instantiate = function () {};
  *
  * @this Animal
  *
- * @see manipulateDirection
+ * @see forceDirection
  */
 
 Animal.prototype.timedMovement = function () {
-    var _this = this;
 
     var dir = 0;
 
     this.rand = Math.random() * 3;
 
-    this.loopedMovement = this.game.time.events.loop(Phaser.Timer.SECOND * 3 + this.rand, function () {
+    this.loopedMovement = this.game.time.events.loop(Phaser.Timer.SECOND * 3 + this.rand, () => {
         dir = Math.floor(Math.random() * 4);
-        _this.rand = Math.random() * 3;
-        manipulateDirection(_this, dir);
+        this.rand = Math.random() * 3;
+        forceDirection(this, dir);
     });
 };
 
@@ -163,14 +181,13 @@ Animal.prototype.timedMovement = function () {
  */
 
 Animal.prototype.listen = function () {
-    var _this2 = this;
 
-    this.scan.add(function () {
-        _this2.scope.$emit("scanned", { animal: _this2 });
+    this.scan.add(() => {
+        this.scope.$emit("scanned", { animal: this });
     });
 
-    this.scope.$on("pathfind", function (e, data) {
-        _this2._pathfind(data.row, data.col);
+    this.scope.$on("pathfind", (e, data) => {
+        this._pathfind(data.row, data.col);
     });
 };
 
@@ -188,7 +205,6 @@ Animal.prototype.listen = function () {
  */
 
 Animal.prototype._pathfind = function (itemRow, itemCol) {
-    var _this3 = this;
 
     var e = new EasyStar.js(),
         row = this.sprite.row,
@@ -199,15 +215,15 @@ Animal.prototype._pathfind = function (itemRow, itemCol) {
     e.setAcceptableTiles([1]);
     e.setIterationsPerCalculation(1000);
 
-    e.findPath(row, col, itemRow, itemCol, function (path) {
+    e.findPath(row, col, itemRow, itemCol, path => {
 
         if (!path) {
             console.log("path not found");
         } else {
-            _this3.game.time.events.remove(_this3.loopedMovement);
-            dirs = determineDirections(path);
-            resetSprite(_this3, true);
-            _this3._followDirection(true, path, dirs);
+            this.game.time.events.remove(this.loopedMovement);
+            dirs = shrinkPath(path);
+            resetSprite(this, true);
+            this._followDirection(true, path, dirs);
         }
     });
 
@@ -231,10 +247,13 @@ Animal.prototype._pathfind = function (itemRow, itemCol) {
  */
 
 Animal.prototype._followDirection = function (begin, path, dirs) {
-    var _this4 = this;
 
+    // dimensisons of map tiles
     var dim = this.map.tileSize,
-        r = path[0].x,
+
+
+    // get the next direction on the path, then map coordinates for direction
+    r = path[0].x,
         c = path[0].y,
         x = r * dim,
         y = c * dim,
@@ -242,31 +261,30 @@ Animal.prototype._followDirection = function (begin, path, dirs) {
         end = dirs.length === 0 || path.length === 1;
 
     if (begin) {
-        var _game$add$tween;
 
-        this.sprite.tween = (_game$add$tween = this.game.add.tween(this.sprite)).to.apply(_game$add$tween, [{ isoX: x, isoY: y }].concat(_toConsumableArray(Globals.tween)));
+        this.sprite.tween = this.game.add.tween(this.sprite).to({ isoX: x, isoY: y }, ...Globals.tween);
 
-        this.sprite.tween.onComplete.add(function () {
-            _this4.sprite.direction = dirs[0];
+        this.sprite.tween.onComplete.add(() => {
+            this.sprite.direction = dirs[0];
             path.splice(0, 1);
             dirs.splice(0, 1);
 
-            _this4._followDirection(false, path, dirs);
+            this._followDirection(false, path, dirs);
         });
     } else if (!begin && !end) {
-        var _tween;
 
         tween = this.game.add.tween(this.sprite);
-        this.sprite.tween.chain((_tween = tween).to.apply(_tween, [{ isoX: x, isoY: y }].concat(_toConsumableArray(Globals.tween))));
+        this.sprite.tween.chain(tween.to({ isoX: x, isoY: y }, ...Globals.tween));
 
-        tween.onComplete.add(function () {
-            _this4.sprite.direction = dirs[0];
+        tween.onComplete.add(() => {
+            this.sprite.direction = dirs[0];
             path.splice(0, 1);
             dirs.splice(0, 1);
 
-            _this4._followDirection(false, path, dirs);
+            this._followDirection(false, path, dirs);
         });
     } else if (!begin && end) {
+
         resetSprite(this, false);
         this.timedMovement();
     }

@@ -27,6 +27,9 @@
  * @property menuGroup {object} Menu sprite group.
  * @property itemGroup {object} Isometric sprite group.
  *
+ * @property itemList {sList} Singly linked list of the items in the inventory.
+ * @property itemCache {
+ *
  * @property area {object} Total space allocated to Inventory module.
  * @property area.width {number} Width of Inventory module space.
  * @property area.height {number} Height of Inventory module space.
@@ -56,31 +59,42 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
     this.times = 0;
     this.map = map;
 
-    this.items = [];
     this.itemCache = {};
-    this.itemsRow = [];
 
+    // create graphics object
     var graphics = game.add.graphics(0, 0),
         menuGroup = game.add.group(),
-        areaWidth = 260,
+
+
+    // dedicated widths and heights for item content
+    areaWidth = 260,
         areaHeight = 300,
         elementWidth = 65,
         elementHeight = 60;
 
-    this.i = areaHeight;
-    this.j = areaWidth;
-
+    // fix everything to camera
     menuGroup.fixedToCamera = true;
+
     menuGroup.enableBody = true;
     this.menuGroup = menuGroup;
     this.itemGroup = itemGroup;
 
+    // fix graphics to camera
     graphics.fixedToCamera = true;
-    graphics.lineStyle(2, 0xFF0000, 1);
-    graphics.beginFill(0xFF0000, 0.4);
+
+    // assign styles for lines and fill
+    graphics.lineStyle(2, 0xFF0000, 0.5);
+    graphics.beginFill(0xFF0000, 0.3);
+
+    // draw inventory shape
     graphics.drawRect(this.width - areaWidth, this.height - areaHeight, areaWidth, areaHeight);
+
     this.graphics = graphics;
 
+    // create a linked list to hold items
+    this.itemList = new f.LinkedList([]);
+
+    // create area and element objects to store widths and heights
     this.area = {};
     this.area.width = areaWidth;
     this.area.height = areaHeight;
@@ -91,9 +105,11 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
 
     window.graphics = graphics;
 
+    // create new message dispatcher
     this.messages = new Message(this.game, 14, messagePos);
     this.contextMenu = new ContextMenu(this);
 
+    // click event handler
     this._onClick();
 }
 
@@ -102,48 +118,63 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
  *
  * @desc Adds an item to the inventory.
  *
- * @param item {Item} Item to be added.
+ * @param item {Item} Item to be added
  */
 
 Inventory.prototype.addItem = function (item) {
+    this.itemList.push(item);
+};
 
-    var w = this.element.width,
-        h = this.element.height,
-        x = this.width - this.j,
-        y = this.height - this.i,
-        name = item.key;
+Inventory.prototype._refit = function () {
 
-    item.inventorySprite = this.game.add.sprite(x, y, item.key, null, this.menuGroup);
-    item.inventorySprite.width = w;
-    item.inventorySprite.height = h;
+    // remove all existing children from the group so each can be repositioned
+    this.menuGroup.removeAll(true);
 
-    item.inventorySprite.row = (this.area.height - this.i) / h;
-    item.inventorySprite.col = (this.area.width - this.j) / w;
+    var perRow = this.area.width / this.element.width,
 
-    item.inventorySprite.inputEnabled = true;
-    item.inventorySprite.input.useHandCursor = true;
 
-    item.text = this.game.add.text(x, y, name, {
-        font: "Courier",
-        fontSize: 12,
-        fill: "white"
-    });
+    // group items by number of rows
+    items = f.group(this.itemList.toArray(), perRow),
+        item,
+        x = this.width - this.area.width,
+        y = this.height - this.area.height,
+        w = this.element.width,
+        h = this.element.height;
 
-    item.text.fixedToCamera = true;
+    for (var i = 0; i < items.length; i++) {
 
-    this.j -= w;
-    this.itemsRow.push(item);
-    this.items[item.inventorySprite.row] = this.itemsRow;
-    this.itemCache[item.key] = item;
+        var group = items[i];
 
-    if (this.j === 0) {
+        for (var j = 0; j < items[i].length; j++) {
 
-        this.i -= h;
-        this.j = this.area.width;
-        this.items[item.inventorySprite.row + 1] = [];
-        this.itemsRow = [];
-    } else if (this.i === 0) {
-        throw new RangeError("Number of sprites exceeds the number of available tiles.");
+            item = group[j];
+
+            // create sprite at specified (x, y) coordinate pair
+            item.inventorySprite = this.game.add.sprite(x, y, item.key, null, this.menuGroup);
+
+            // force width/height
+            item.inventorySprite.width = w;
+            item.inventorySprite.height = h;
+
+            // enable input to use hand cursor for selection
+            item.inventorySprite.inputEnabled = true;
+            item.inventorySprite.input.useHandCursor = true;
+
+            // add text
+            item.text = this.game.add.text(x, y, name, {
+                font: "Courier",
+                fontSize: 12,
+                fill: "white"
+            });
+
+            // cache this item so it can be refitted later
+            this.itemCache[item.key] = item;
+
+            x += w;
+        }
+
+        x = this.width - this.area.width;
+        y += h;
     }
 };
 
@@ -161,15 +192,16 @@ Inventory.prototype.addItem = function (item) {
  */
 
 Inventory.prototype.addItems = function (items) {
-    var _this2 = this;
 
     if (!Array.isArray(items)) {
-        throw new Error("Use addItem(item) for single items.");
+        console.warn("Use Inventory.addItem(item) for single items.");
     } else {
-        items.forEach(function (item) {
-            _this2.addItem(item);
+        items.forEach(item => {
+            this.addItem(item);
         });
     }
+
+    this._refit();
 };
 
 /**
@@ -185,20 +217,24 @@ Inventory.prototype.addItems = function (items) {
  */
 
 Inventory.prototype._onClick = function () {
-    var _this3 = this;
 
-    this.game.input.onDown.add(function () {
-        if (_this3.mouse.switch) {
-            _this3._placeItem();
+    this.game.input.onDown.add(() => {
+
+        // if the user has selected an item
+        if (this.mouse.switch) {
+            // place it on the map
+            this._placeItem();
         } else {
-            _this3._click();
+            // otherwise, let _click() handle it
+            this._click();
         }
     });
 
-    this.escape.onDown.add(function () {
-        _this3.mouse.switch = false;
-        _this3.mouse.reset();
-        _this3._reset();
+    // if the user escapes, reset everything
+    this.escape.onDown.add(() => {
+        this.mouse.switch = false;
+        this.mouse.reset();
+        this._reset();
     });
 };
 
@@ -216,38 +252,55 @@ Inventory.prototype._click = function () {
 
     var _this = this;
 
+    // create context menu
     this.game.canvas.oncontextmenu = function (e) {
         e.preventDefault();
         _this.contextMenu.createContextMenu();
     };
 
+    // calculate the (x, y) coordinates of the inventory box location
     var cornerX = this.width - this.area.width,
         cornerY = this.height - this.area.height,
-        relativeX = this.mouse.twoD.x - cornerX,
+
+
+    // calculate corner bounds for mouse location
+    relativeX = this.mouse.twoD.x - cornerX,
         relativeY = this.mouse.twoD.y - cornerY;
 
     if (this.mouse.twoD.x > cornerX && this.mouse.twoD.y > cornerY) {
 
+        // get correct row, column, and position on map
         var col = Math.floor(relativeX / this.element.width),
             row = Math.floor(relativeY / this.element.height),
-            item;
+            loc = col + (row > 0 ? row * (this.area.height / this.element.height) - 1 : 0),
+            item,
 
-        if (this.items[row][col]) {
 
-            item = this.items[row][col];
+        // get items from linked list
+        items = this.itemList.toArray();
 
+        // if an item exists at the location that was clicked
+        if (items[loc]) {
+
+            item = items[loc];
+
+            // if there is an item that has already been selected, reset it
             if (this.currentItem) {
                 this.currentItem.inventorySprite.tint = 0xFFFFFF;
                 this.currentItem.inventorySprite.clicked = false;
                 this.currentItem.inventorySprite.useHandCursor = true;
             }
 
+            // turn the mouse selection on
             this.mouse.switch = true;
+
+            // set clicked and change tints
             item.inventorySprite.clicked = true;
             item.inventorySprite.tint = 0xFFDD00;
             item.text.tint = 0xFFDD00;
 
             this.currentItem = item;
+            this.currentItem.location = loc;
         }
     }
 };
@@ -263,12 +316,13 @@ Inventory.prototype._click = function () {
  */
 
 Inventory.prototype._reset = function () {
-    var _this4 = this;
 
-    this.menuGroup.forEach(function (item) {
+    this.menuGroup.forEach(item => {
         item.input.useHandCursor = true;
         item.tint = 0xFFFFFF;
-        _this4.itemCache[item.key].text.tint = 0xFFFFFF;
+
+        // retrieve items from object cache
+        this.itemCache[item.key].text.tint = 0xFFFFFF;
 
         if (item.clicked) {
             item.clicked = false;
@@ -289,31 +343,43 @@ Inventory.prototype._reset = function () {
 
 Inventory.prototype._placeItem = function () {
 
+    // get size of the tiles in the map
     var tileSize = this.mouse.map.tileSize,
-        x = this.mouse.threeD.x - this.mouse.threeD.x % tileSize,
+
+
+    // calculate the position of the mouse relative to the map
+    x = this.mouse.threeD.x - this.mouse.threeD.x % tileSize,
         y = this.mouse.threeD.y - this.mouse.threeD.y % tileSize,
         item = this.currentItem,
         key = item.key,
         tile = this.mouse.tile,
-        message = "Sorry, you can't place the " + key + " there. Choose a place that you've already seen!",
-        row,
-        col;
+        message = `Sorry, you can't place the ${ key } there. Choose a place that you've already seen!`;
 
+    // if the selected tile is discovered and the mouse is in bounds
     if (tile.discovered && isInBounds(this.mouse)) {
 
-        row = item.inventorySprite.row;
-        col = item.inventorySprite.col;
-
+        // add the isometric sprite to the map
         item.sprite = this.game.add.isoSprite(x, y, 0, key, null, this.itemGroup);
+
+        // initialize the item
         item.threeDInitialize();
 
+        // call the item's action (if there is none, a console warning is thrown)
         item.action();
+
+        // destroy the item body and text in the inventory
         item.inventorySprite.destroy();
         item.text.destroy();
 
-        this.items[row][col] = null;
+        // remove the item from the item list
+        this.itemList.remove(this.currentItem.location);
+
+        // reset the mouse
         this.mouse.reset();
         this.mouse.switch = false;
+
+        // refit all the items
+        this._refit();
     } else {
         this.messages.add(message);
     }

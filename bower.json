@@ -10,12 +10,13 @@
     "test"
   ],
   "dependencies": {
-    "phaser": "2.4.4",
-    "phaser-isometric": "*",
     "angular": "^1.5.7",
     "easystarjs": "easystar.js#^0.3.0",
     "jquery": "^3.1.0",
-    "webfontloader": "^1.6.26"
+    "phaser": "2.4.4",
+    "phaser-isometric": "*",
+    "webfontloader": "^1.6.26",
+    "array_functions": "da_funk#1.4.0"
   },
   "devDependencies": {},
   "appPath": "app",

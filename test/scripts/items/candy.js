@@ -20,8 +20,14 @@
  * @constructor
  */
 
-function Candy (game, key, inventory, scope) {
-    Item.call(this, game, key, inventory);
+function Candy (game, key, inventory, scope, name) {
+
+    if (name) {
+        Item.call(this, game, key, inventory, name);
+    } else {
+        Item.call(this, game, key, inventory);
+    }
+
     this.scope = scope;
 }
 

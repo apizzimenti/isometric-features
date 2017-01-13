@@ -25,13 +25,46 @@
 function Debug(game) {
 
     this.game = game;
+
+    // gets middle screen position
     this.x = this.game.width / 2;
+
     this.y = 20;
     this.color = "#FFF";
-    this.on = true;
+    this.on = false;
 
+    // add graphics and assign _this = this to preserve context
     var graphics = game.add.graphics(0, 0),
         _this = this;
+
+    // fixes graphics to camera and assigns line and fill styles
+    graphics.fixedToCamera = true;
+    graphics.lineStyle(1, 0xFFFFFF, 0);
+    graphics.beginFill(0, 0xFFFFFF, 0);
+
+    this.graphics = graphics;
+
+    // draws a button wireframe
+    this.button = graphics.drawRect(20, 50, 62, 25);
+
+    // enable mouse clicks and hand cursor
+    this.button.inputEnabled = true;
+    this.button.input.useHandCursor = true;
+
+    // add text to the button area
+    this.text = this.game.add.text(25, 50, "debug", {
+        font: "Courier",
+        fontSize: 20,
+        fill: "white"
+    });
+
+    // fix *text* to camera
+    this.text.fixedToCamera = true;
+
+    // add event listener for the button click; call _switch() on callback
+    this.button.events.onInputDown.add(() => {
+        this._switch();
+    });
 }
 
 /**
@@ -64,7 +97,7 @@ Debug.prototype.fps = function () {
 Debug.prototype.mousePos = function (mouse) {
 
     if (this.on) {
-        this.game.debug.text(mouse.row + ", " + mouse.col, this.x, this.y + 20, this.color);
+        this.game.debug.text(`${ mouse.row }, ${ mouse.col }`, this.x, this.y + 20, this.color);
     }
 };
 
@@ -79,58 +112,40 @@ Debug.prototype.mousePos = function (mouse) {
  */
 
 Debug.prototype.sprite = function (sprites) {
-    var _this2 = this;
 
     if (this.on) {
-        var debugSprite = function debugSprite(sprite) {
 
+        var debugSprite = sprite => {
+
+            // try to write sprite wireframes to the game window;
             try {
 
                 var s = sprite.sprite;
 
-                _this2.game.debug.body(s, "#FFFFFF", false);
+                this.game.debug.body(s, "#FFFFFF", false);
 
                 if (s.tile) {
-                    _this2.game.debug.body(s.tile.top, "#FF0000", false);
+                    this.game.debug.body(s.tile.top, "#FF0000", false);
                 }
 
                 if (s.tile) {
                     for (var tile in s.tile) {
                         if (s.tile.hasOwnProperty(tile) && tile !== "top") {
-                            _this2.game.debug.body(s.tile[tile], "#FFDD00", false);
+                            this.game.debug.body(s.tile[tile], "#FFDD00", false);
                         }
                     }
                 }
             } catch (e) {
-                console.warn(sprite.type + " is not yet loaded");
+                // if they aren't loaded yet, send a warning to the console window
+                console.warn(`${ sprite.type } is not yet loaded`);
             }
         };
 
+        // check if sprites is an array or a single sprite
         if (Array.isArray(sprites)) {
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
 
-            try {
-
-                for (var _iterator = sprites[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var sprite = _step.value;
-
-                    debugSprite(sprite);
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
-                }
+            for (var sprite of sprites) {
+                debugSprite(sprite);
             }
         } else {
             debugSprite(sprites);
@@ -141,7 +156,7 @@ Debug.prototype.sprite = function (sprites) {
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Displays blocked tiles' debug bodies.
+ * @desc Displays blocked tiles" debug bodies.
  *
  * @param tiles {sprite[]} An array of tile sprites.
  *
@@ -168,11 +183,11 @@ Debug.prototype.tiles = function (tiles) {
  *
  * @desc Allows for future implementation of a _button on/off switch for displaying debug info.
  *
- * @this Debug
+ * @private
  *
- * @todo Implement buttons.
+ * @this Debug
  */
 
-Debug.prototype.switch = function () {
+Debug.prototype._switch = function () {
     this.on = !this.on;
 };

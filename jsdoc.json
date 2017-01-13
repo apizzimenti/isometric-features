@@ -1,0 +1,11 @@
+{
+  "source": {
+    "include": ["lib/", "lib/README.md"]
+  },
+
+  "opts": {
+    "tmeplate": "node_modules/minami",
+    "destination": "../isometric-features-docs",
+    "recurse": "true"
+  }
+}

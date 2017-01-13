@@ -1,7 +1,5 @@
-/*! iso-game-features - v0.0.1 - 2016-08-18
+/*! isometric-features - v0.0.1 - 2016-12-20
 * Copyright (c) 2016 ; Licensed MIT */
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 6/29/16.
@@ -78,9 +76,6 @@ function dim(tileSize, mapSize, num) {
         return tileSize - mapSize;
     }
 }
-
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 5/19/16.
@@ -124,28 +119,45 @@ function direction(Sprite) {
  * @param Sprite {Animal | Player | Item} Object containing a Phaser isometric sprite.
  *
  * @private
+ *
+ * @see determineTileRadius
  */
 
 function _assignDirection(Sprite) {
 
     var sprite = Sprite.sprite,
-        x = sprite.body.frontX,
+
+
+    // gets front (x, y) coordinates of sprite wireframe
+    x = sprite.body.frontX,
         y = sprite.body.frontY,
         tileMap = Sprite.map.tileMap,
         tileSize = Sprite.map.tileSize,
-        row = Math.ceil(x / tileSize) >= tileMap.length - 1 ? tileMap.length - 1 : Math.ceil(x / tileSize),
+
+
+    // calculates sprite row/column position; if (x, y) pair is out of world bounds, force it to the nearest row/column
+    row = Math.ceil(x / tileSize) >= tileMap.length - 1 ? tileMap.length - 1 : Math.ceil(x / tileSize),
         col = Math.ceil(y / tileSize) >= tileMap[0].length - 1 ? tileMap[0].length - 1 : Math.ceil(y / tileSize),
         dir = sprite.direction,
-        r = determineTileRadius(tileMap.length, row),
+
+
+    // returns adjusted position values for calculating vision radius
+    r = determineTileRadius(tileMap.length, row),
         c = determineTileRadius(tileMap[0].length, col),
-        rp = r.p,
+
+
+    // adjusted position values for vision radius
+    rp = r.p,
         rm = r.m,
         cp = c.p,
         cm = c.m;
 
+    // assigns sprite row, column properties
     sprite.row = row;
     sprite.col = col;
 
+    // finds the tile at the center of the sprite's hitwireframebox
+    // (I asked my girlfriend to help me choose between "wireframe" and "hitbox" and she came up with "hitwireframebox", so)
     sprite.tile.center = tileMap[row][col];
 
     switch (dir) {
@@ -182,6 +194,7 @@ function _assignDirection(Sprite) {
             break;
     }
 
+    // loads the correct texture based on the sprite's direction
     sprite.loadTexture(Sprite.keys[dir]);
 }
 
@@ -210,15 +223,16 @@ function determineTileRadius(length, dim) {
  * @desc Takes in a sprite and a direction number, and sets the velocity accordingly.
  *
  * @param sprite {Player | Animal} Sprite's parent.
- * @param d {number} Randomized direction.
+ * @param direction {number} Direction.
  */
 
-function manipulateDirection(sprite, d) {
+function forceDirection(sprite, direction) {
 
     var speed = 20,
         s = sprite.sprite;
 
-    switch (d) {
+    // forces velocity in a given direction
+    switch (direction) {
         case 0:
             s.body.velocity.x = speed;
             s.body.velocity.y = 0;
@@ -259,7 +273,7 @@ function manipulateDirection(sprite, d) {
  * @returns {number[]} The directions, in succession, that the sprite will be facing on this path.
  */
 
-function determineDirections(path) {
+function shrinkPath(path) {
 
     var x,
         y,
@@ -276,6 +290,8 @@ function determineDirections(path) {
             x_1 = path[i + 1].x;
             y_1 = path[i + 1].y;
 
+            // each number pushed into last[] describes a direction; compares current and next instruction to
+            // determine direction
             if (x > x_1) {
                 last.push(2);
             } else if (x < x_1) {
@@ -301,14 +317,15 @@ function determineDirections(path) {
  */
 
 function resetSprite(sprite, body) {
+
     var s = sprite.sprite;
+
     s.body.velocity.x = 0;
     s.body.velocity.y = 0;
     s.direction = 0;
 
     s.body.moves = !body;
 }
-
 "use strict";
 
 /**
@@ -332,13 +349,46 @@ function resetSprite(sprite, body) {
 function Debug(game) {
 
     this.game = game;
+
+    // gets middle screen position
     this.x = this.game.width / 2;
+
     this.y = 20;
     this.color = "#FFF";
-    this.on = true;
+    this.on = false;
 
+    // add graphics and assign _this = this to preserve context
     var graphics = game.add.graphics(0, 0),
         _this = this;
+
+    // fixes graphics to camera and assigns line and fill styles
+    graphics.fixedToCamera = true;
+    graphics.lineStyle(1, 0xFFFFFF, 0);
+    graphics.beginFill(0, 0xFFFFFF, 0);
+
+    this.graphics = graphics;
+
+    // draws a button wireframe
+    this.button = graphics.drawRect(20, 50, 62, 25);
+
+    // enable mouse clicks and hand cursor
+    this.button.inputEnabled = true;
+    this.button.input.useHandCursor = true;
+
+    // add text to the button area
+    this.text = this.game.add.text(25, 50, "debug", {
+        font: "Courier",
+        fontSize: 20,
+        fill: "white"
+    });
+
+    // fix *text* to camera
+    this.text.fixedToCamera = true;
+
+    // add event listener for the button click; call _switch() on callback
+    this.button.events.onInputDown.add(() => {
+        this._switch();
+    });
 }
 
 /**
@@ -371,7 +421,7 @@ Debug.prototype.fps = function () {
 Debug.prototype.mousePos = function (mouse) {
 
     if (this.on) {
-        this.game.debug.text(mouse.row + ", " + mouse.col, this.x, this.y + 20, this.color);
+        this.game.debug.text(`${ mouse.row }, ${ mouse.col }`, this.x, this.y + 20, this.color);
     }
 };
 
@@ -386,58 +436,40 @@ Debug.prototype.mousePos = function (mouse) {
  */
 
 Debug.prototype.sprite = function (sprites) {
-    var _this2 = this;
 
     if (this.on) {
-        var debugSprite = function debugSprite(sprite) {
 
+        var debugSprite = sprite => {
+
+            // try to write sprite wireframes to the game window;
             try {
 
                 var s = sprite.sprite;
 
-                _this2.game.debug.body(s, "#FFFFFF", false);
+                this.game.debug.body(s, "#FFFFFF", false);
 
                 if (s.tile) {
-                    _this2.game.debug.body(s.tile.top, "#FF0000", false);
+                    this.game.debug.body(s.tile.top, "#FF0000", false);
                 }
 
                 if (s.tile) {
                     for (var tile in s.tile) {
                         if (s.tile.hasOwnProperty(tile) && tile !== "top") {
-                            _this2.game.debug.body(s.tile[tile], "#FFDD00", false);
+                            this.game.debug.body(s.tile[tile], "#FFDD00", false);
                         }
                     }
                 }
             } catch (e) {
-                console.warn(sprite.type + " is not yet loaded");
+                // if they aren't loaded yet, send a warning to the console window
+                console.warn(`${ sprite.type } is not yet loaded`);
             }
         };
 
+        // check if sprites is an array or a single sprite
         if (Array.isArray(sprites)) {
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
 
-            try {
-
-                for (var _iterator = sprites[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var sprite = _step.value;
-
-                    debugSprite(sprite);
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
-                }
+            for (var sprite of sprites) {
+                debugSprite(sprite);
             }
         } else {
             debugSprite(sprites);
@@ -448,7 +480,7 @@ Debug.prototype.sprite = function (sprites) {
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Displays blocked tiles' debug bodies.
+ * @desc Displays blocked tiles" debug bodies.
  *
  * @param tiles {sprite[]} An array of tile sprites.
  *
@@ -475,19 +507,14 @@ Debug.prototype.tiles = function (tiles) {
  *
  * @desc Allows for future implementation of a _button on/off switch for displaying debug info.
  *
- * @this Debug
+ * @private
  *
- * @todo Implement buttons.
+ * @this Debug
  */
 
-Debug.prototype.switch = function () {
+Debug.prototype._switch = function () {
     this.on = !this.on;
 };
-
-"use strict";
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 (function () {})();
 /**
  * Created by apizzimenti on 5/19/16.
@@ -504,19 +531,33 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
  * @property mapTileKey {string[]} Will contain keys for tile sprites.
  * @property tween {array} Default tween settings.
  * @property paramNotExist {function} Global testing method for parameters.
+ * @property colorTween {function}
  */
 
 var Globals = {
-  anchor: [0.5, 0],
-  mapTileKey: [],
-  tween: [1000, Phaser.Easing.Linear.None, true, 0, 0, false],
-  paramNotExist: function paramNotExist(param, type) {
-    return (typeof param === "undefined" ? "undefined" : _typeof(param)) !== type || param == undefined;
-  }
+    anchor: [0.5, 0],
+    mapTileKey: [],
+    tween: [1000, Phaser.Easing.Linear.None, true, 0, 0, false],
+
+    paramNotExist: function (param, type) {
+        return typeof param !== type || param == undefined;
+    },
+
+    colorTween: function (game, object, start, end, t) {
+
+        console.dir(object);
+
+        var blend = { step: 0 },
+            tween = game.add.tween(blend).to({ step: 100 }, t);
+
+        tween.onUpdateCallback(() => {
+            object.tint = Phaser.Color.interpolateColor(start, end, 100, Math.floor(blend.step), 1);
+        });
+
+        object.tint = start;
+        tween.start();
+    }
 };
-
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 7/15/16.
@@ -552,11 +593,14 @@ function Mouse(game, map, group) {
     this.game = game;
     this.map = map;
     this.group = group;
+
+    // create a new Point3 to project 2d position onto isometric map
     this.pos = new Phaser.Plugin.Isometric.Point3();
 
     var x = this.game.input.mousePointer.x,
         y = this.game.input.mousePointer.y;
 
+    // note 2d and 3d points
     this.twoD = new Phaser.Point(x, y);
     this.threeD = this.game.iso.unproject(this.twoD, this.pos);
 
@@ -592,6 +636,7 @@ Mouse.prototype.update = function () {
         frontX = this.game.physics.isoArcade.bounds.frontX,
         frontY = this.game.physics.isoArcade.bounds.frontY;
 
+    // assigns inBounds property to check if mouse is within physics world bounds.
     this.inBounds = this.threeD.x > backX && this.threeD.x < frontX && this.threeD.y > backY && this.threeD.y < frontY;
 };
 
@@ -600,38 +645,42 @@ Mouse.prototype.update = function () {
  *
  * @desc If the mouse is in selected mode (i.e. <code>switch</code> is true), this determines the tile to animate.
  *
+ * @param [animation] {Object} Container for custom mouse on-select animation.
+ *
+ * @example
+ * // values shown in this example animation object are the default values for the system
+ *
+ * var animation = {
+ *         tint: 0x98FB98,                                          // hexadecimal color
+ *         alpha: 1.3 + Math.sin(this.game.time.now * 0.007),       // value applied to tile transparency
+ *         tween: [{isoZ: 5}, 20, Phaser.Easing.Linear.None, true]  // tween arguments to modify tile physics properties
+ *     }
+ *
  * @this Mouse
  */
 
-Mouse.prototype.selected = function () {
-    var _this = this;
+Mouse.prototype.selected = function (animation) {
+
+    var notExist = Globals.paramNotExist(animation, "object");
 
     if (this.inBounds) {
 
-        this.group.forEach(function (tile) {
+        this.group.forEach(tile => {
 
             if (tile.type === "tile") {
-                var inside = tile.isoBounds.containsXY(_this.threeD.x + _this.map.tileSize, _this.threeD.y + _this.map.tileSize);
+
+                var inside = tile.isoBounds.containsXY(this.threeD.x + this.map.tileSize, this.threeD.y + this.map.tileSize);
 
                 if (inside) {
 
-                    _this.tile = tile;
+                    this.tile = tile;
 
-                    _this.row = _this.tile.row;
-                    _this.col = _this.tile.col;
+                    this.row = tile.row;
+                    this.col = tile.col;
 
-                    tile.tint = 0x98FB98;
-                    tile.alpha = 1.3 + Math.sin(_this.game.time.now * 0.007);
-
-                    _this.tween = _this.game.add.tween(tile).to({ isoZ: 5 }, 20, Phaser.Easing.Linear.None, true);
-                    _this.tweened = true;
-                } else {
-
-                    if (_this.tweened) {
-                        _this.tween.stop();
-                        _this.tweened = !_this.tweened;
-                        tile.isoZ = 0;
-                    }
+                    tile.tint = notExist ? 0x98FB98 : animation.tint || 0x98FB98;
+                    tile.alpha = notExist ? 1.3 + Math.sin(this.game.time.now * 0.007) : animation.alpha || 1.3 + Math.sin(this.game.time.now * 0.007);
+                } else if (!inside) {
                     tile.discovered ? tile.tint = 0xFFFFFF : tile.tint = 0x571F57;
                     tile.alpha = 1;
                 }
@@ -651,25 +700,43 @@ Mouse.prototype.selected = function () {
  */
 
 Mouse.prototype.reset = function () {
-    var _this2 = this;
 
-    this.group.forEach(function (tile) {
+    this.group.forEach(tile => {
 
         if (tile.type === "tile") {
             tile.discovered ? tile.tint = 0xFFFFFF : tile.tint = 0x571F57;
             tile.alpha = 1;
             tile.isoZ = 0;
-            _this2.game.canvas.style.cursor = "default";
+            this.game.canvas.style.cursor = "default";
         }
     });
 };
-
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 5/19/16.
+ * This is automatically included in the isometric-features package to provide its users some ease-of-use.
  */
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Setup object.
+ *
+ * @param game {object} Current Phaser game instance.
+ * @param scope {object} Angular scope.
+ *
+ * @property game {object} Phaser game instance.
+ * @property scope {object} Angular scope.
+ *
+ * @class Setup
+ * @constructor
+ * @this Setup
+ */
+
+function System(game, scope) {
+    this.game = game;
+    this.scope = scope;
+}
 
 /**
  * @author Anthony Pizzimenti
@@ -678,9 +745,13 @@ Mouse.prototype.reset = function () {
  *
  * @param game {object} Phaser game instance.
  * @param context {object} the context game is bound to.
+ *
+ * @returns {{esc: object, space: object}}
+ *
+ * @this System
  */
 
-function keymap(game, context) {
+System.prototype.keymap = function (game, context) {
 
     context.cursors = game.input.keyboard.createCursorKeys();
 
@@ -699,9 +770,11 @@ function keymap(game, context) {
  *
  * @param Player {Player} Phaser Player sprite.
  * @param context {object} the context game is bound to.
+ *
+ * @this System
  */
 
-function keymapTrack(Player, context) {
+System.prototype.keymapTrack = function (Player, context) {
 
     /**
      * Default speed in px/s for specified sprite.
@@ -733,8 +806,104 @@ function keymapTrack(Player, context) {
     } else {
         sprite.body.velocity.x = 0;
     }
-}
+};
 
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Called in the default state's preload() function property.
+ *
+ * @property tiles {Phaser.Group} Phaser group dedicated to tiles.
+ * @property characters {Phaser.Group} Phaser group dedicated to moving sprites.
+ *
+ * @this System
+ */
+
+System.prototype.preload = function () {
+
+    // add isometric plugin
+    this.game.plugins.add(new Phaser.Plugin.Isometric(this.game));
+
+    // new group for tiles
+    this.tiles = this.game.add.group();
+    this.tiles.enableBody = true;
+    this.tiles.physicsBodyType = Phaser.Plugin.Isometric.ISOARCADE;
+
+    // new group for moving sprites
+    this.characters = this.game.add.group();
+    this.characters.enableBody = true;
+    this.characters.physicsBodyType = Phaser.Plugin.Isometric.ISOARCADE;
+
+    // start the physics system and set the anchor for the game
+    this.game.physics.startSystem(Phaser.Plugin.Isometric.ISOARCADE);
+    this.game.iso.anchor.setTo(...Globals.anchor);
+
+    // set the world bounds; these aren't the bounds of the physics system, but are larger than the game window
+    // so the camera follows the Player
+    this.game.world.setBounds(0, 0, 2400, 2400);
+
+    // set up game properties
+    this.game.time.advancedTiming = true;
+    this.game.debug.renderShadow = false;
+    this.game.stage.disableVisibilityChange = true;
+
+    // shoot some messages into the console when the onLoad event is fired.
+    this.scope.$on("load", e => {
+
+        var host = window.location.origin + "/",
+            docs = "https://apizzimenti.github.io/isometric-features-docs/";
+
+        console.log("%c documentation " + `%c ${ docs }`, "background: #0095dd; color: #FFF", "color: #5D5D5D");
+    });
+};
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Called in the default state's update() function.
+ *
+ * @param context {object} Context to which the space, escape, and arrow keys are attached.
+ * @param characters {Phaser.Group} Group dedicated to moving sprites.
+ * @param [player=null] {Player} Main character.
+ * @param [creatures=null] {Animal[]} Array of animal sprites.
+ * @param [mouse=null] {Mouse} Game's Mouse object.
+ * @param [props=null] {object} Properties for mouse animation.
+ *
+ * @see Mouse#selected
+ *
+ * @this System
+ */
+
+System.prototype.update = function (context, characters, player, creatures, mouse, props) {
+
+    // collision physics
+    // this.game.physics.isoArcade.collide(characters);
+    this.game.iso.simpleSort(characters);
+
+    // keep track of the Player's direction, keymapping, and restrict the vision radius
+    if (Globals.paramNotExist(player)) {
+        direction(player);
+        this.keymapTrack(player, context);
+        player.visionRadius();
+    }
+
+    // keep track of each Animal's direction
+    if (Globals.paramNotExist(creatures)) {
+        creatures.forEach(creature => {
+            direction(creature);
+            creature.isVisible(player);
+        });
+    }
+
+    // mouse tracking; if the mouse switch is ON, make sure the tiles are glowing
+    if (Globals.paramNotExist(mouse)) {
+        mouse.update();
+
+        if (mouse.switch) {
+            Globals.paramNotExist(props) ? mouse.selected(props) : mouse.selected();
+        }
+    }
+};
 "use strict";
 
 /**
@@ -784,10 +953,7 @@ function keymapTrack(Player, context) {
  * @see Map
  */
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function Animal(game, scope, row, col, keys, group, map, species, scale, auto) {
-    var _sprite$anchor, _sprite$scale;
 
     this.type = "animal";
     this.species = species || keys[0];
@@ -812,19 +978,34 @@ function Animal(game, scope, row, col, keys, group, map, species, scale, auto) {
     var x = row * map.tileSize,
         y = col * map.tileSize;
 
+    // add isometric sprite
     this.sprite = this.game.add.isoSprite(x, y, 0, keys[0], null, group);
+
+    // this object will be tied to the sprite; contains all tile information
     this.sprite.tile = {};
-    (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(Globals.anchor));
+
+    // set anchor, enable physics, enable body
+    this.sprite.anchor.set(...Globals.anchor);
     this.game.physics.isoArcade.enable(this.sprite);
     this.sprite.enableBody = true;
-    this.sprite.body.collideWorldBounds = true;
-    this.sprite.visible = !this.map.fog;
-    (_sprite$scale = this.sprite.scale).setTo.apply(_sprite$scale, _toConsumableArray(this.scale));
 
+    // object will collide world bounds
+    this.sprite.body.collideWorldBounds = true;
+
+    // if fog of war is turned on, then sprite is invisible
+    this.sprite.visible = !this.map.fog;
+
+    // set object scale
+    this.sprite.scale.setTo(...this.scale);
+
+    // initialize sprite scanned value
     this.scanned = false;
+
+    // handler for scanning
     this.scan = new Phaser.Signal();
     this.listen();
 
+    // determine the direction of the sprite
     direction(this);
 }
 
@@ -842,22 +1023,29 @@ Animal.prototype.isVisible = function (Player) {
 
     if (Player.auto) {
 
+        // current player position
         var pRow = Player.row,
             pCol = Player.col,
-            row = this.sprite.row,
+
+
+        // current animal position
+        row = this.sprite.row,
             col = this.sprite.col,
-            inRow = row >= pRow - 1 && row <= pRow + 1,
+
+
+        // is the animal sprite within a one-tile radius of the player?
+        inRow = row >= pRow - 1 && row <= pRow + 1,
             inCol = col >= pCol - 1 && col <= pCol + 1;
 
         if (inRow && inCol) {
+            // if yes, make the sprite visible
             this.sprite.visible = true;
         }
 
+        // if this animal sprite returns to a discovered tile, then make it visible again
         this.sprite.tile.center.discovered ? this.sprite.visible = true : this.sprite.visible = false;
     }
 };
-
-Animal.prototype._instantiate = function () {};
 
 /**
  * @author Anthony Pizzimenti
@@ -870,20 +1058,19 @@ Animal.prototype._instantiate = function () {};
  *
  * @this Animal
  *
- * @see manipulateDirection
+ * @see forceDirection
  */
 
 Animal.prototype.timedMovement = function () {
-    var _this = this;
 
     var dir = 0;
 
     this.rand = Math.random() * 3;
 
-    this.loopedMovement = this.game.time.events.loop(Phaser.Timer.SECOND * 3 + this.rand, function () {
+    this.loopedMovement = this.game.time.events.loop(Phaser.Timer.SECOND * 3 + this.rand, () => {
         dir = Math.floor(Math.random() * 4);
-        _this.rand = Math.random() * 3;
-        manipulateDirection(_this, dir);
+        this.rand = Math.random() * 3;
+        forceDirection(this, dir);
     });
 };
 
@@ -896,14 +1083,13 @@ Animal.prototype.timedMovement = function () {
  */
 
 Animal.prototype.listen = function () {
-    var _this2 = this;
 
-    this.scan.add(function () {
-        _this2.scope.$emit("scanned", { animal: _this2 });
+    this.scan.add(() => {
+        this.scope.$emit("scanned", { animal: this });
     });
 
-    this.scope.$on("pathfind", function (e, data) {
-        _this2._pathfind(data.row, data.col);
+    this.scope.$on("pathfind", (e, data) => {
+        this._pathfind(data.row, data.col);
     });
 };
 
@@ -921,7 +1107,6 @@ Animal.prototype.listen = function () {
  */
 
 Animal.prototype._pathfind = function (itemRow, itemCol) {
-    var _this3 = this;
 
     var e = new EasyStar.js(),
         row = this.sprite.row,
@@ -932,15 +1117,15 @@ Animal.prototype._pathfind = function (itemRow, itemCol) {
     e.setAcceptableTiles([1]);
     e.setIterationsPerCalculation(1000);
 
-    e.findPath(row, col, itemRow, itemCol, function (path) {
+    e.findPath(row, col, itemRow, itemCol, path => {
 
         if (!path) {
             console.log("path not found");
         } else {
-            _this3.game.time.events.remove(_this3.loopedMovement);
-            dirs = determineDirections(path);
-            resetSprite(_this3, true);
-            _this3._followDirection(true, path, dirs);
+            this.game.time.events.remove(this.loopedMovement);
+            dirs = shrinkPath(path);
+            resetSprite(this, true);
+            this._followDirection(true, path, dirs);
         }
     });
 
@@ -964,10 +1149,13 @@ Animal.prototype._pathfind = function (itemRow, itemCol) {
  */
 
 Animal.prototype._followDirection = function (begin, path, dirs) {
-    var _this4 = this;
 
+    // dimensisons of map tiles
     var dim = this.map.tileSize,
-        r = path[0].x,
+
+
+    // get the next direction on the path, then map coordinates for direction
+    r = path[0].x,
         c = path[0].y,
         x = r * dim,
         y = c * dim,
@@ -975,31 +1163,30 @@ Animal.prototype._followDirection = function (begin, path, dirs) {
         end = dirs.length === 0 || path.length === 1;
 
     if (begin) {
-        var _game$add$tween;
 
-        this.sprite.tween = (_game$add$tween = this.game.add.tween(this.sprite)).to.apply(_game$add$tween, [{ isoX: x, isoY: y }].concat(_toConsumableArray(Globals.tween)));
+        this.sprite.tween = this.game.add.tween(this.sprite).to({ isoX: x, isoY: y }, ...Globals.tween);
 
-        this.sprite.tween.onComplete.add(function () {
-            _this4.sprite.direction = dirs[0];
+        this.sprite.tween.onComplete.add(() => {
+            this.sprite.direction = dirs[0];
             path.splice(0, 1);
             dirs.splice(0, 1);
 
-            _this4._followDirection(false, path, dirs);
+            this._followDirection(false, path, dirs);
         });
     } else if (!begin && !end) {
-        var _tween;
 
         tween = this.game.add.tween(this.sprite);
-        this.sprite.tween.chain((_tween = tween).to.apply(_tween, [{ isoX: x, isoY: y }].concat(_toConsumableArray(Globals.tween))));
+        this.sprite.tween.chain(tween.to({ isoX: x, isoY: y }, ...Globals.tween));
 
-        tween.onComplete.add(function () {
-            _this4.sprite.direction = dirs[0];
+        tween.onComplete.add(() => {
+            this.sprite.direction = dirs[0];
             path.splice(0, 1);
             dirs.splice(0, 1);
 
-            _this4._followDirection(false, path, dirs);
+            this._followDirection(false, path, dirs);
         });
     } else if (!begin && end) {
+
         resetSprite(this, false);
         this.timedMovement();
     }
@@ -1043,7 +1230,6 @@ function createAnimals(scope, num, game, keys, group, map, species) {
 
     return animals;
 }
-
 "use strict";
 
 /**
@@ -1065,30 +1251,37 @@ function createAnimals(scope, num, game, keys, group, map, species) {
  * @property inventorySprite {sprite} On initialization, this will contain a regular Phaser sprite.
  * @property sprite {sprite} On selected, this will contain an isometric Sprite.
  * @property sprite.tile {object} Contains location and directional information for the sprite.
+ * @property auto {boolean} Is this sprite automatically loaded?
  * @property direction {number} This sprite's default direction.
+ * @property location {number} When this item is selected, this is its index in the linked list of items.
  *
  * @class {object} Item
  * @this Item
  */
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function Item(game, key, inventory, name) {
 
-  this.keys = [key, key, key, key];
+    this.keys = [key, key, key, key];
 
-  this.game = game;
-  this.key = key;
+    this.game = game;
+    this.key = key;
 
-  this.inventory = inventory;
-  this.text = {};
+    if (name) {
+        this.name = name;
+    } else {
+        this.name = key;
+    }
 
-  this.inventorySprite = {};
-  this.sprite = {};
-  this.sprite.tile = {};
-  this.sprite.direction = 0;
-  this.map = this.inventory.map;
-  this.auto = true;
+    this.inventory = inventory;
+    this.text = {};
+
+    this.inventorySprite = {};
+    this.sprite = {};
+    this.sprite.tile = {};
+    this.sprite.direction = 0;
+    this.map = this.inventory.map;
+    this.auto = true;
+    this.location = 0;
 }
 
 /**
@@ -1100,34 +1293,30 @@ function Item(game, key, inventory, name) {
  */
 
 Item.prototype.action = function () {
-  console.log("NoActionMethod: " + this.key + " is using the builtin action method");
+    console.warn(`${ this.key } is using the builtin action method`);
 };
 
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Initializes objects for the isometric physics system. Sprites are immovable.
+ * @desc Initializes objects for the isometric physics system.
  *
  * @this Item
  */
 
 Item.prototype.threeDInitialize = function () {
-  var _sprite$anchor;
 
-  (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(Globals.anchor));
-  this.sprite.body.collideWorldBounds = true;
-  this.game.physics.isoArcade.enable(this.sprite);
-  this.sprite.enableBody = true;
+    this.sprite.anchor.set(...Globals.anchor);
+    this.sprite.body.collideWorldBounds = true;
+    this.game.physics.isoArcade.enable(this.sprite);
+    this.sprite.enableBody = true;
 
-  this.sprite.tile = {};
-  this.sprite.direction = 0;
+    this.sprite.tile = {};
+    this.sprite.direction = 0;
 
-  this.sprite.body.immovable = true;
-
-  this.setting = true;
-  direction(this);
+    this.setting = true;
+    direction(this);
 };
-
 "use strict";
 
 /**
@@ -1172,7 +1361,12 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
     this.tileSize = tileSize;
     this.mapSize = mapSize;
     this.group = group;
-    this.fog = fog;
+
+    if (!Globals.paramNotExist(fog)) {
+        this.fog = false;
+    } else {
+        this.fog = fog;
+    }
 
     if (atlas_json_exists) {
         this._generateMapKeys();
@@ -1191,16 +1385,16 @@ function Map(game, group, tileSet, tileSize, mapSize, preferredTiles, fog) {
             tile = this.game.add.isoSprite(row * this.tileSize, col * this.tileSize, 0, this.tileSet, frame, this.group);
 
             if (col > tiles.length - 2 || row < 1 || row > tiles.length - 2 || col < 1) {
-                tile.tint = this.fog ? 0x571F57 : 0xFFFFFF;
                 tile.blocked = true;
                 blockedArray[row].push(0);
             } else {
                 tile.blocked = false;
-                tile.tint = this.fog ? 0x571F57 : 0xFFFFFF;
                 blockedArray[row].push(1);
             }
 
-            tile.discovered = this.fog ? false : true;
+            tile.tint = this.fog ? 0x571F57 : 0xFFFFFF;
+
+            tile.discovered = !this.fog;
             tile.type = "tile";
 
             tile.anchor.set(0.5, 1);
@@ -1278,292 +1472,10 @@ Map.prototype._createTileMap = function (size) {
  */
 
 Map.prototype._generateMapKeys = function () {
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-
-    try {
-        for (var _iterator = this.game.cache._cache.image[this.tileSet].frameData._frames[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var frame = _step.value;
-
-            Globals.mapTileKey.push(frame.name);
-        }
-    } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-                _iterator.return();
-            }
-        } finally {
-            if (_didIteratorError) {
-                throw _iteratorError;
-            }
-        }
+    for (var frame of this.game.cache._cache.image[this.tileSet].frameData._frames) {
+        Globals.mapTileKey.push(frame.name);
     }
 };
-
-"use strict";
-
-/**
- * @author Anthony Pizzimenti
- *
- * @desc Player object.
- *
- * @param game {object} Current game instance.
- * @param row {number} Initial row.
- * @param col {number} Initial column.
- * @param keys {string[]} Cached Phaser texture IDs to be assigned.
- * @param group {object} Phaser group.
- * @param map {Map} This game's Map object.
- * @param [scale=1] {number | number[]} The desired sprite scale factor. Can be of the format x, [x], or [x, y].
- * @param [auto=true] {boolean} Do you want this Player to be instantiated immediately?
- *
- * @property game {object} Current game instance.
- * @property sprite {sprite} Phaser isoSprite.
- *
- * @property sprite.tile {object} Empty object that, on direction initialization, will be populated.
- * @property sprite.tile.center {sprite} Center tile.
- * @property sprite.tile.top {sprite} Tile to the relative top.
- * @property sprite.tile.left {sprite} Tile to the relative left.
- * @property sprite.tile.bottom {sprite} Tile to the relative bottom.
- * @property sprite.tile.right {sprite} Tile to the relative right.
- *
- * @property map {Map} This game's Map object.
- * @property row {number} Current tile row.
- * @property col {number} Current tile number.
- *
- * @property auto {boolean} Is this sprite loaded automatically?
- *
- * @class {object} Player
- * @this Player
- * @constructor
- *
- * @see Animal
- * @see direction
- * @see Globals
- */
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-function Player(game, row, col, keys, group, map, scale, auto) {
-    var _sprite$anchor, _sprite$scale;
-
-    this.type = "player";
-    this.map = map;
-
-    if (auto !== undefined) {
-        this.auto = auto;
-    } else {
-        this.auto = true;
-    }
-
-    var x = row * this.map.tileSize,
-        y = col * this.map.tileSize;
-
-    this.game = game;
-    this.keys = keys;
-    this.group = group;
-
-    if (scale) {
-        this.scale = Array.isArray(scale) ? scale : [scale];
-    } else {
-        this.scale = [1];
-    }
-
-    this.sprite = this.game.add.isoSprite(x, y, 0, keys[0], null, group);
-    (_sprite$anchor = this.sprite.anchor).set.apply(_sprite$anchor, _toConsumableArray(Globals.anchor));
-
-    this.sprite.body.collideWorldBounds = true;
-    this.sprite.body.moves = false;
-
-    (_sprite$scale = this.sprite.scale).setTo.apply(_sprite$scale, _toConsumableArray(this.scale));
-    this.sprite.visible = false;
-    this.game.camera.follow(this.sprite);
-
-    if (this.auto) {
-        this.create();
-    }
-}
-
-/**
- * @author Anthony Pizzimenti
- *
- * @desc If <code>this.auto</code> is true or undefined, then this method is called automatically. Otherwise, call it
- * when the Player is to be instantiated. See the test folder's Loader class for an example.
- *
- * @this Player
- */
-
-Player.prototype.create = function () {
-    var _this2 = this;
-
-    this.sprite.visible = true;
-
-    if (this.intro) {
-        this.intro.start();
-        this.intro.onComplete.add(function () {
-            _this2._instantiate();
-            if (_this2.postTween) {
-                _this2.postTween.f(_this2);
-            }
-        });
-    } else {
-        this._instantiate();
-    }
-};
-
-/**
- * @author Anthony Pizzimenti
- *
- * @desc Private method that is called from create(), instantiating the sprite after its intro is complete.
- *
- * @private
- *
- * @this Player
- */
-
-Player.prototype._instantiate = function () {
-
-    this.auto = true;
-
-    // camera follows this sprite
-
-    this.sprite.direction = 0;
-    this.sprite.tile = {};
-
-    this.sprite.body.bounce = new Phaser.Plugin.Isometric.Point3(0.5, 0.5, 0.5);
-    this.sprite.body.moves = true;
-};
-
-/**
- * @author Anthony Pizzimenti
- *
- * @param preTween {object} Object literal containing the starting values to be set before the intro tween is
- * run.
- * @param tweenParameters {object} Parameters for the intro tween.
- * @param tweenParameters.properties {object} Properties to be modified by the tween.
- * @param [tweenParameters.duration=1000] {number} Duration of the tween.
- * @param [tweenParameters.easing=Phaser.Linear.Easing.None] {object} Type of easing interpreted by Phaser.
- * @param [postTween=null] Object literal containing values to be assigned to the sprite after the intro tween is complete.
- *
- * @example
- * // example parameters:
- *
- * var initial = {
- *     isoZ: 100
- * };
- *
- * var tween = {
- *     properties: {
- *         isoZ: 24
- *     },
- *     duration: 2000,
- *     easing: Phaser.Easing.Bounce
- * }
- *
- * var player = new Player (game, row, col, keys, group, map, null, false); // player is not set to be immediately created
- * player.addIntro(initial, tween);
- * player.create();
- *
- * @this Player
- */
-
-Player.prototype.addIntro = function (preTween, tweenParameters, postTween) {
-    var _game$add$tween;
-
-    var params = [],
-        tP = tweenParameters;
-
-    if (Globals.paramNotExist(preTween, "object")) {
-        throw new TypeError("preTween is not of type object");
-    } else if (Globals.paramNotExist(tP, "object")) {
-        throw new TypeError("tweenParameters is not of type object");
-    } else if (postTween) {
-
-        if (Globals.paramNotExist(postTween, "object")) {
-            throw new TypeError("postTween parameter is not of type object");
-        }
-
-        this.postTween = {};
-        this.postTween.props = postTween;
-        this.postTween.f = function (_this) {
-            for (var arg in _this.postTween.props) {
-                if (_this.postTween.props.hasOwnProperty(arg)) {
-                    _this.sprite[arg] = _this.postTween.props[arg];
-                }
-            }
-        };
-    }
-
-    for (var init in preTween) {
-        if (preTween.hasOwnProperty(init)) {
-            this.sprite[init] = preTween[init];
-        }
-    }
-
-    if (!tP.hasOwnProperty("properties")) {
-        throw new ReferenceError("tweenParameters has no defined 'properties' property");
-    } else if (!tP.hasOwnProperty("easing")) {
-        throw new ReferenceError("tweenParameters has no defined 'easing' property");
-    } else if (!tP.hasOwnProperty("duration")) {
-        throw new ReferenceError("tweenParameters has no defined 'duration' property");
-    } else {
-        params[0] = tP.properties;
-        params[1] = tP.duration;
-        params[2] = tP.easing;
-    }
-
-    this.intro = (_game$add$tween = this.game.add.tween(this.sprite)).to.apply(_game$add$tween, params.concat([false, 0, 0, false]));
-};
-
-Player.prototype.addOuttro = function (tweenParameters) {};
-
-/**
- * @author Anthony Pizzimenti
- *
- * @desc Tracks the 3x3 vision radius of the Player, and changes tiles within that radius to visible. Is turned off
- * if <code>Map.fog === false</code>.
- *
- * @this Player
- */
-
-Player.prototype.visionRadius = function () {
-
-    var i,
-        j,
-        tile = {},
-        row = this.sprite.row,
-        col = this.sprite.col;
-
-    for (i = row - 1; i < row + 2; i++) {
-        for (j = col - 1; j < col + 2; j++) {
-            tile = this.map.tileMap[i][j];
-            tile.tint = 0xFFFFFF;
-            tile.discovered = true;
-        }
-    }
-};
-
-/**
- * @author Anthony Pizzimenti
- *
- * @deprecated
- *
- * @desc Makes the player sprite float (as if defying gravity).
- *
- * @private
- *
- * @this Player
- */
-
-Player.prototype._float = function () {
-    this.sprite.isoZ = 5 + Math.sin(this.game.time.now * 0.005);
-};
-
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 7/15/16.
@@ -1600,11 +1512,11 @@ function ContextMenu(Inventory) {
  * @desc Creates a context menu at the current x, y position.
  *
  * @this contextMenu
+ *
+ * @todo Accept actions param which provides {key => value} pairs that describe actions and provide callbacks
  */
 
-ContextMenu.prototype.createContextMenu = function () {
-    var _this = this;
-
+ContextMenu.prototype.createContextMenu = function (actions) {
     var x = this.mouse.twoD.x,
         y = this.mouse.twoD.y,
         graphics = this.game.add.graphics(0, 0);
@@ -1616,13 +1528,10 @@ ContextMenu.prototype.createContextMenu = function () {
 
     this.menu = this.graphics.drawRect(x, y, 100, 150);
 
-    this.mouse.mouse.onDown.add(function () {
-        _this.menu.destroy();
+    this.mouse.mouse.onDown.add(() => {
+        this.menu.destroy();
     });
 };
-
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 7/21/16.
@@ -1668,7 +1577,7 @@ ContextMenu.prototype.createContextMenu = function () {
  *    "text-align": "center"
  * });
  *
- * // check the test/ folder for a usable example.
+ * // check the test folder for a usable example.
  *
  * @class Guide
  * @constructor
@@ -1676,11 +1585,21 @@ ContextMenu.prototype.createContextMenu = function () {
 
 function Guide(element, gameElement, buttonOptions, menuStyles) {
 
+    // setup work
+
     var _this = this;
 
+    // contains javascript object references to guide text elements
     this.raw = {};
 
-    this.raw.buttonOptions = buttonOptions || null;
+    // if the buttonOptions param exists, assign it
+    if (!Globals.paramNotExist(buttonOptions)) {
+        this.raw.buttonOptions = buttonOptions;
+    } else {
+        this.raw.buttonOptions = null;
+    }
+
+    // default styles for the button
     this.raw.buttonOptions.default = {
         "color": "#FFF",
         "border": "none",
@@ -1690,18 +1609,26 @@ function Guide(element, gameElement, buttonOptions, menuStyles) {
 
     this.raw.guideId = element;
     this.raw.canvasId = gameElement;
+
+    // retrieve html objects with passed parameters; retrieve canvas element from game
     this.raw.guide = document.getElementById(element);
     this.raw.game = document.getElementById(gameElement);
     this.raw.canvas = this.raw.game.getElementsByTagName("canvas")[0];
+
+    // get the html (not just the text) from the guide block
     this.raw.guideHtml = this.raw.guide.innerHTML;
+
+    // retrieve offsets
     this.raw.offsetTop = this.raw.canvas.offsetTop;
     this.raw.offsetLeft = this.raw.canvas.offsetLeft;
     this.raw.on = false;
     this.raw.guide.styles = menuStyles || null;
 
-    $(document).ready(function () {
-        _this.guideElement = $("#" + element);
+    $(document).ready(() => {
+        // jquery object reference to find the specific guide element
+        _this.guideElement = $(`#${ element }`);
 
+        // on ready, configure the window and instantiate the button
         _this._configureWindow();
         _this._button();
     });
@@ -1719,29 +1646,45 @@ function Guide(element, gameElement, buttonOptions, menuStyles) {
 
 Guide.prototype._button = function () {
 
+    // note: I do not like jquery or designing user interfaces at all.
+
+    // create a new button element
     var button = document.createElement("button"),
-        buttonText = document.createTextNode(this.raw.buttonOptions.text || "i"),
+
+
+    // add text based on options or, if options is null, put the classic "i"
+    buttonText = document.createTextNode(this.raw.buttonOptions.text || "i"),
         id = "guideButton",
-        template = "#" + id,
+
+
+    // template now points to the jquery object reference
+    template = `#${ id }`,
         _this = this;
 
     button.id = id;
+
+    // attach text html object to game window
     button.appendChild(buttonText);
     this.raw.game.appendChild(button);
     this.raw.guideButton = button;
+
+    // change classname
     this.raw.guideButton.className = "guide-button";
     this.raw.guideButton.on = false;
     this.raw.guideButton.template = template;
 
+    // change offsets
     $(template).css({
         "top": _this.raw.offsetTop + 20,
         "left": _this.raw.offsetLeft + 20
     });
 
+    // if custom style arguments were provided, use them
     if (this.raw.buttonOptions.style) {
         $(template).css(this.raw.buttonOptions.style);
     }
 
+    // since hovering is super finnicky and isn't great with CSS, do it in jquery (which is arguably worse)
     $(template).hover(function () {
         $(template).css({
             "cursor": "pointer"
@@ -1762,16 +1705,17 @@ Guide.prototype._button = function () {
         }
     });
 
-    $(template).click(function () {
+    // look at this! changing properties when you click on something takes 12 lines of ugly code! (sigh)
+    $(template).click(() => {
 
         if (!_this.raw.guideButton.on) {
             _this.raw.guideButton.on = true;
-            $("#" + _this.raw.guideId).css({
+            $(`#${ _this.raw.guideId }`).css({
                 "display": "block"
             });
         } else {
             _this.raw.guideButton.on = false;
-            $("#" + _this.raw.guideId).css({
+            $(`#${ _this.raw.guideId }`).css({
                 "display": "none"
             });
         }
@@ -1790,17 +1734,26 @@ Guide.prototype._button = function () {
 
 Guide.prototype._configureWindow = function () {
 
-    var template = "#" + this.raw.guideId,
-        offset = $("#" + this.raw.canvasId).offset(),
+    // grab the jquery reference to the guide element itself
+    var template = `#${ this.raw.guideId }`,
+
+
+    // get the offsets of the game canvas so we can position the guide window accordingly
+    offset = $(`#${ this.raw.canvasId }`).offset(),
         canvas = this.raw.canvas,
-        w = canvas.width / 2,
+
+
+    // do a bit of math to appropriately position the window in the center of the screen but within the canvas
+    w = canvas.width / 2,
         h = canvas.height / 2,
         top = h / 2 + offset.top,
         left = (window.innerWidth - canvas.offsetWidth + w) / 2,
         el = this.raw.guide;
 
+    // apply classname so that static styles from the CSS can be applied
     el.className = "guide";
 
+    // switch up the offsets
     $(template).css({
         "display": "none",
         "left": left,
@@ -1809,11 +1762,11 @@ Guide.prototype._configureWindow = function () {
         "height": h
     });
 
+    // if custom styles exist, apply them
     if (this.raw.guide.styles) {
         $(template).css(this.raw.guide.styles);
     }
 };
-
 "use strict";
 
 /**
@@ -1838,6 +1791,9 @@ Guide.prototype._configureWindow = function () {
  * @property times {number} Number of times tooltips have been viewed.
  * @property menuGroup {object} Menu sprite group.
  * @property itemGroup {object} Isometric sprite group.
+ *
+ * @property itemList {sList} Singly linked list of the items in the inventory.
+ * @property itemCache {
  *
  * @property area {object} Total space allocated to Inventory module.
  * @property area.width {number} Width of Inventory module space.
@@ -1868,31 +1824,42 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
     this.times = 0;
     this.map = map;
 
-    this.items = [];
     this.itemCache = {};
-    this.itemsRow = [];
 
+    // create graphics object
     var graphics = game.add.graphics(0, 0),
         menuGroup = game.add.group(),
-        areaWidth = 260,
+
+
+    // dedicated widths and heights for item content
+    areaWidth = 260,
         areaHeight = 300,
         elementWidth = 65,
         elementHeight = 60;
 
-    this.i = areaHeight;
-    this.j = areaWidth;
-
+    // fix everything to camera
     menuGroup.fixedToCamera = true;
+
     menuGroup.enableBody = true;
     this.menuGroup = menuGroup;
     this.itemGroup = itemGroup;
 
+    // fix graphics to camera
     graphics.fixedToCamera = true;
-    graphics.lineStyle(2, 0xFF0000, 1);
-    graphics.beginFill(0xFF0000, 0.4);
+
+    // assign styles for lines and fill
+    graphics.lineStyle(2, 0xFF0000, 0.5);
+    graphics.beginFill(0xFF0000, 0.3);
+
+    // draw inventory shape
     graphics.drawRect(this.width - areaWidth, this.height - areaHeight, areaWidth, areaHeight);
+
     this.graphics = graphics;
 
+    // create a linked list to hold items
+    this.itemList = new f.LinkedList([]);
+
+    // create area and element objects to store widths and heights
     this.area = {};
     this.area.width = areaWidth;
     this.area.height = areaHeight;
@@ -1903,9 +1870,11 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
 
     window.graphics = graphics;
 
+    // create new message dispatcher
     this.messages = new Message(this.game, 14, messagePos);
     this.contextMenu = new ContextMenu(this);
 
+    // click event handler
     this._onClick();
 }
 
@@ -1914,48 +1883,63 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
  *
  * @desc Adds an item to the inventory.
  *
- * @param item {Item} Item to be added.
+ * @param item {Item} Item to be added
  */
 
 Inventory.prototype.addItem = function (item) {
+    this.itemList.push(item);
+};
 
-    var w = this.element.width,
-        h = this.element.height,
-        x = this.width - this.j,
-        y = this.height - this.i,
-        name = item.key;
+Inventory.prototype._refit = function () {
 
-    item.inventorySprite = this.game.add.sprite(x, y, item.key, null, this.menuGroup);
-    item.inventorySprite.width = w;
-    item.inventorySprite.height = h;
+    // remove all existing children from the group so each can be repositioned
+    this.menuGroup.removeAll(true);
 
-    item.inventorySprite.row = (this.area.height - this.i) / h;
-    item.inventorySprite.col = (this.area.width - this.j) / w;
+    var perRow = this.area.width / this.element.width,
 
-    item.inventorySprite.inputEnabled = true;
-    item.inventorySprite.input.useHandCursor = true;
 
-    item.text = this.game.add.text(x, y, name, {
-        font: "Courier",
-        fontSize: 12,
-        fill: "white"
-    });
+    // group items by number of rows
+    items = f.group(this.itemList.toArray(), perRow),
+        item,
+        x = this.width - this.area.width,
+        y = this.height - this.area.height,
+        w = this.element.width,
+        h = this.element.height;
 
-    item.text.fixedToCamera = true;
+    for (var i = 0; i < items.length; i++) {
 
-    this.j -= w;
-    this.itemsRow.push(item);
-    this.items[item.inventorySprite.row] = this.itemsRow;
-    this.itemCache[item.key] = item;
+        var group = items[i];
 
-    if (this.j === 0) {
+        for (var j = 0; j < items[i].length; j++) {
 
-        this.i -= h;
-        this.j = this.area.width;
-        this.items[item.inventorySprite.row + 1] = [];
-        this.itemsRow = [];
-    } else if (this.i === 0) {
-        throw new RangeError("Number of sprites exceeds the number of available tiles.");
+            item = group[j];
+
+            // create sprite at specified (x, y) coordinate pair
+            item.inventorySprite = this.game.add.sprite(x, y, item.key, null, this.menuGroup);
+
+            // force width/height
+            item.inventorySprite.width = w;
+            item.inventorySprite.height = h;
+
+            // enable input to use hand cursor for selection
+            item.inventorySprite.inputEnabled = true;
+            item.inventorySprite.input.useHandCursor = true;
+
+            // add text
+            item.text = this.game.add.text(x, y, name, {
+                font: "Courier",
+                fontSize: 12,
+                fill: "white"
+            });
+
+            // cache this item so it can be refitted later
+            this.itemCache[item.key] = item;
+
+            x += w;
+        }
+
+        x = this.width - this.area.width;
+        y += h;
     }
 };
 
@@ -1973,15 +1957,16 @@ Inventory.prototype.addItem = function (item) {
  */
 
 Inventory.prototype.addItems = function (items) {
-    var _this2 = this;
 
     if (!Array.isArray(items)) {
-        throw new Error("Use addItem(item) for single items.");
+        console.warn("Use Inventory.addItem(item) for single items.");
     } else {
-        items.forEach(function (item) {
-            _this2.addItem(item);
+        items.forEach(item => {
+            this.addItem(item);
         });
     }
+
+    this._refit();
 };
 
 /**
@@ -1997,20 +1982,24 @@ Inventory.prototype.addItems = function (items) {
  */
 
 Inventory.prototype._onClick = function () {
-    var _this3 = this;
 
-    this.game.input.onDown.add(function () {
-        if (_this3.mouse.switch) {
-            _this3._placeItem();
+    this.game.input.onDown.add(() => {
+
+        // if the user has selected an item
+        if (this.mouse.switch) {
+            // place it on the map
+            this._placeItem();
         } else {
-            _this3._click();
+            // otherwise, let _click() handle it
+            this._click();
         }
     });
 
-    this.escape.onDown.add(function () {
-        _this3.mouse.switch = false;
-        _this3.mouse.reset();
-        _this3._reset();
+    // if the user escapes, reset everything
+    this.escape.onDown.add(() => {
+        this.mouse.switch = false;
+        this.mouse.reset();
+        this._reset();
     });
 };
 
@@ -2028,38 +2017,55 @@ Inventory.prototype._click = function () {
 
     var _this = this;
 
+    // create context menu
     this.game.canvas.oncontextmenu = function (e) {
         e.preventDefault();
         _this.contextMenu.createContextMenu();
     };
 
+    // calculate the (x, y) coordinates of the inventory box location
     var cornerX = this.width - this.area.width,
         cornerY = this.height - this.area.height,
-        relativeX = this.mouse.twoD.x - cornerX,
+
+
+    // calculate corner bounds for mouse location
+    relativeX = this.mouse.twoD.x - cornerX,
         relativeY = this.mouse.twoD.y - cornerY;
 
     if (this.mouse.twoD.x > cornerX && this.mouse.twoD.y > cornerY) {
 
+        // get correct row, column, and position on map
         var col = Math.floor(relativeX / this.element.width),
             row = Math.floor(relativeY / this.element.height),
-            item;
+            loc = col + (row > 0 ? row * (this.area.height / this.element.height) - 1 : 0),
+            item,
 
-        if (this.items[row][col]) {
 
-            item = this.items[row][col];
+        // get items from linked list
+        items = this.itemList.toArray();
 
+        // if an item exists at the location that was clicked
+        if (items[loc]) {
+
+            item = items[loc];
+
+            // if there is an item that has already been selected, reset it
             if (this.currentItem) {
                 this.currentItem.inventorySprite.tint = 0xFFFFFF;
                 this.currentItem.inventorySprite.clicked = false;
                 this.currentItem.inventorySprite.useHandCursor = true;
             }
 
+            // turn the mouse selection on
             this.mouse.switch = true;
+
+            // set clicked and change tints
             item.inventorySprite.clicked = true;
             item.inventorySprite.tint = 0xFFDD00;
             item.text.tint = 0xFFDD00;
 
             this.currentItem = item;
+            this.currentItem.location = loc;
         }
     }
 };
@@ -2075,12 +2081,13 @@ Inventory.prototype._click = function () {
  */
 
 Inventory.prototype._reset = function () {
-    var _this4 = this;
 
-    this.menuGroup.forEach(function (item) {
+    this.menuGroup.forEach(item => {
         item.input.useHandCursor = true;
         item.tint = 0xFFFFFF;
-        _this4.itemCache[item.key].text.tint = 0xFFFFFF;
+
+        // retrieve items from object cache
+        this.itemCache[item.key].text.tint = 0xFFFFFF;
 
         if (item.clicked) {
             item.clicked = false;
@@ -2101,38 +2108,47 @@ Inventory.prototype._reset = function () {
 
 Inventory.prototype._placeItem = function () {
 
+    // get size of the tiles in the map
     var tileSize = this.mouse.map.tileSize,
-        x = this.mouse.threeD.x - this.mouse.threeD.x % tileSize,
+
+
+    // calculate the position of the mouse relative to the map
+    x = this.mouse.threeD.x - this.mouse.threeD.x % tileSize,
         y = this.mouse.threeD.y - this.mouse.threeD.y % tileSize,
         item = this.currentItem,
         key = item.key,
         tile = this.mouse.tile,
-        message = "Sorry, you can't place the " + key + " there. Choose a place that you've already seen!",
-        row,
-        col;
+        message = `Sorry, you can't place the ${ key } there. Choose a place that you've already seen!`;
 
+    // if the selected tile is discovered and the mouse is in bounds
     if (tile.discovered && isInBounds(this.mouse)) {
 
-        row = item.inventorySprite.row;
-        col = item.inventorySprite.col;
-
+        // add the isometric sprite to the map
         item.sprite = this.game.add.isoSprite(x, y, 0, key, null, this.itemGroup);
+
+        // initialize the item
         item.threeDInitialize();
 
+        // call the item's action (if there is none, a console warning is thrown)
         item.action();
+
+        // destroy the item body and text in the inventory
         item.inventorySprite.destroy();
         item.text.destroy();
 
-        this.items[row][col] = null;
+        // remove the item from the item list
+        this.itemList.remove(this.currentItem.location);
+
+        // reset the mouse
         this.mouse.reset();
         this.mouse.switch = false;
+
+        // refit all the items
+        this._refit();
     } else {
         this.messages.add(message);
     }
 };
-
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 7/15/16.
@@ -2150,7 +2166,7 @@ Inventory.prototype._placeItem = function () {
  *
  * @property game {object} Phaser game instance.
  * @property y {number} Height of the game.
- * @property message {string | string[]} Message to be displayed.
+ * @property messages {string[]} Message queue.
  * @property fontSize {number} Font size.
  * @property style {object} Message styling.
  * @property style.font {string} Font style.
@@ -2163,22 +2179,24 @@ Inventory.prototype._placeItem = function () {
  */
 
 function Message(game, size, loc) {
-    var _this = this;
 
     this.game = game;
     this.y = this.game.height;
-    this.message = "";
+    this.messages = [];
     this.loc = loc;
     this.fontSize = size;
+
     this.style = {
         font: size + "px Courier",
         fill: "#FFFFFF"
     };
 
+    // create Phaser signal dispatcher
     this.alert = new Phaser.Signal();
 
-    this.alert.add(function () {
-        _this._display();
+    // instantiate new events
+    this.alert.add(() => {
+        this._display();
     });
 }
 
@@ -2193,36 +2211,50 @@ function Message(game, size, loc) {
  */
 
 Message.prototype.add = function (message) {
-    this.message = message;
-    this.alert.dispatch();
+    this.messages.push(message);
+
+    if (this.messages.length <= 1) {
+        this.alert.dispatch();
+    }
 };
 
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Displays the message on the screen for five seconds, with in and out tweens.
+ * @desc Displays the message at the front of the queue on the screen for five seconds, with in and out tweens.
  *
  * @private
  *
  * @this Message
- *
- * @todo get messages queue to work
  */
 
 Message.prototype._display = function () {
-    var _this2 = this;
 
-    var str = this._format(this.message);
+    // correctly format message
+    var str = this._format(this.messages[0]),
+        tween;
 
+    // add message text
     this.text = this.game.add.text(str.x, str.y, str.msg, this.style);
 
     this.text.alpha = 0;
     this.text.fixedToCamera = true;
 
+    // tween the text in
     this.game.add.tween(this.text).to({ alpha: 1 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
 
-    this.game.time.events.add(Phaser.Timer.SECOND * 5, function () {
-        _this2.game.add.tween(_this2.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+    this.game.time.events.add(Phaser.Timer.SECOND * 3, () => {
+
+        // tween the text out
+        tween = this.game.add.tween(this.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+
+        // when the above tween is completed, reset the queue and dispactch the next message
+        tween.onComplete.add(() => {
+            this.messages = this.messages.slice(1, this.messages.length);
+            if (this.messages.length !== 0) {
+                this.alert.dispatch();
+            }
+        });
     });
 };
 
@@ -2286,155 +2318,256 @@ Message.prototype._format = function (message) {
     vals.msg = strs.join(" ");
     return vals;
 };
-
 "use strict";
-
-(function () {})();
-/**
- * Created by apizzimenti on 7/15/16.
- */
 
 /**
  * @author Anthony Pizzimenti
  *
- * @desc The Message structure handles all the popup messages in the game.
+ * @desc Player object.
  *
- * @param game {object} Current Phaser game instance.
- * @param size {number} Font size.
- * @param [loc="bottom_left"] {string} Preferred location for messages: can be <code>"bottom_left"</code>, <code>"bottom_right"</code>,
- * <code>"top_left"</code>, or <code>"top_right"</code>.
+ * @param game {object} Current game instance.
+ * @param row {number} Initial row.
+ * @param col {number} Initial column.
+ * @param keys {string[]} Cached Phaser texture IDs to be assigned.
+ * @param group {object} Phaser group.
+ * @param map {Map} This game's Map object.
+ * @param [scale=1] {number | number[]} The desired sprite scale factor. Can be of the format x, [x], or [x, y].
+ * @param [auto=true] {boolean} Do you want this Player to be instantiated immediately?
  *
- * @property game {object} Phaser game instance.
- * @property y {number} Height of the game.
- * @property message {string | string[]} Message to be displayed.
- * @property fontSize {number} Font size.
- * @property style {object} Message styling.
- * @property style.font {string} Font style.
- * @property style.fill {string} Hexadecimal color value.
- * @property alert {Signal} Signal.
+ * @property game {object} Current game instance.
+ * @property sprite {sprite} Phaser isoSprite.
  *
- * @class {object} Message
- * @this Message
+ * @property sprite.tile {object} Empty object that, on direction initialization, will be populated.
+ * @property sprite.tile.center {sprite} Center tile.
+ * @property sprite.tile.top {sprite} Tile to the relative top.
+ * @property sprite.tile.left {sprite} Tile to the relative left.
+ * @property sprite.tile.bottom {sprite} Tile to the relative bottom.
+ * @property sprite.tile.right {sprite} Tile to the relative right.
+ *
+ * @property map {Map} This game's Map object.
+ * @property row {number} Current tile row.
+ * @property col {number} Current tile number.
+ *
+ * @property auto {boolean} Is this sprite loaded automatically?
+ *
+ * @class {object} Player
+ * @this Player
  * @constructor
+ *
+ * @see Animal
+ * @see direction
+ * @see Globals
  */
 
-function Message(game, size, loc) {
-    var _this = this;
+function Player(game, row, col, keys, group, map, scale, auto) {
+
+    this.type = "player";
+    this.map = map;
+
+    // choose defaults for auto property
+    if (!Globals.paramNotExist(auto)) {
+        this.auto = auto;
+    } else {
+        this.auto = true;
+    }
+
+    var x = row * this.map.tileSize,
+        y = col * this.map.tileSize;
 
     this.game = game;
-    this.y = this.game.height;
-    this.message = "";
-    this.loc = loc;
-    this.fontSize = size;
-    this.style = {
-        font: size + "px Courier",
-        fill: "#FFFFFF"
-    };
+    this.keys = keys;
+    this.group = group;
 
-    this.alert = new Phaser.Signal();
+    if (scale) {
+        this.scale = Array.isArray(scale) ? scale : [scale];
+    } else {
+        this.scale = [1];
+    }
 
-    this.alert.add(function () {
-        _this.display();
-    });
+    // create isometric sprite, set its anchor, enable body
+    this.sprite = this.game.add.isoSprite(x, y, 0, keys[0], null, group);
+    this.sprite.anchor.set(...Globals.anchor);
+    this.sprite.body.collideWorldBounds = true;
+    this.sprite.body.moves = false;
+
+    // set scale, visibility, camera tracking
+    this.sprite.scale.setTo(...this.scale);
+    this.sprite.visible = false;
+    this.game.camera.follow(this.sprite);
+
+    if (this.auto) {
+        this.create();
+    }
 }
 
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Adds the provided message to the queue.
+ * @desc If <code>this.auto</code> is true or undefined, then this method is called automatically. Otherwise, call it
+ * when the Player is to be instantiated. See the test folder's Loader class for an example.
  *
- * @param message {string} Message to be added to the queue.
- *
- * @this Message
+ * @this Player
  */
 
-Message.prototype.add = function (message) {
-    this.message = message;
-    this.alert.dispatch();
+Player.prototype.create = function () {
+
+    this.sprite.visible = true;
+
+    if (this.intro) {
+        this.intro.start();
+        this.intro.onComplete.add(() => {
+            this._instantiate();
+            if (this.postTween) {
+                this.postTween.f(this);
+            }
+        });
+    } else {
+        this._instantiate();
+    }
 };
 
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Displays the message on the screen for five seconds, with in and out tweens.
+ * @desc Private method that is called from create(), instantiating the sprite after its intro is complete.
  *
- * @this Message
+ * @private
  *
- * @todo get messages queue to work
+ * @this Player
  */
 
-Message.prototype.display = function () {
-    var _this2 = this;
+Player.prototype._instantiate = function () {
 
-    var str = this.format(this.message);
+    this.auto = true;
 
-    this.text = this.game.add.text(str.x, str.y, str.msg, this.style);
+    // camera follows this sprite
+    this.sprite.direction = 0;
+    this.sprite.tile = {};
 
-    this.text.alpha = 0;
-    this.text.fixedToCamera = true;
-
-    this.game.add.tween(this.text).to({ alpha: 1 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
-
-    this.game.time.events.add(Phaser.Timer.SECOND * 5, function () {
-        _this2.game.add.tween(_this2.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
-    });
+    this.sprite.body.bounce = new Phaser.Plugin.Isometric.Point3(0.5, 0.5, 0.5);
+    this.sprite.body.moves = true;
 };
 
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Formats messages so they are 60 characters wide.
+ * @param preTween {object} Object literal containing the starting values to be set before the intro tween is
+ * run.
+ * @param tweenParameters {object} Parameters for the intro tween.
+ * @param tweenParameters.properties {object} Properties to be modified by the tween.
+ * @param [tweenParameters.duration=1000] {number} Duration of the tween.
+ * @param [tweenParameters.easing=Phaser.Linear.Easing.None] {object} Type of easing interpreted by Phaser.
+ * @param [postTween=null] Object literal containing values to be assigned to the sprite after the intro tween is complete.
  *
- * @param message {string} Message to be formatted.
+ * @example
+ * // example parameters:
  *
- * @returns {{x: number, y: number, msg: string}} Width and height of Phaser message area; formatted string.
+ * var initial = {
+ *     isoZ: 100
+ * };
  *
- * @todo Format according to where words are, not just the 60th character.
+ * var tween = {
+ *     properties: {
+ *         isoZ: 24
+ *     },
+ *     duration: 2000,
+ *     easing: Phaser.Easing.Bounce
+ * }
+ *
+ * var player = new Player (game, row, col, keys, group, map, null, false); // player is not set to be immediately created
+ * player.addIntro(initial, tween);
+ * player.create();
+ *
+ * @this Player
  */
 
-Message.prototype.format = function (message) {
+Player.prototype.addIntro = function (preTween, tweenParameters, postTween) {
 
-    var last = 0,
-        strs = [],
-        dist = message.length % 60 ? message.length - message.length % 60 : 0,
-        vals = {};
+    var params = [],
+        tP = tweenParameters;
 
-    for (var i = 0; i < message.length; i++) {
+    if (Globals.paramNotExist(preTween, "object")) {
+        throw new TypeError("preTween is not of type object");
+    } else if (Globals.paramNotExist(tP, "object")) {
+        throw new TypeError("tweenParameters is not of type object");
+    } else if (postTween) {
 
-        if (!(i % 60) && i !== 0) {
-            strs.push(message.slice(last, i) + "\n");
-            last = i;
-        } else if (dist === 0 && i === message.length - 1) {
-            strs.push(message.slice(last, message.length));
-        } else if (i > dist && dist !== 0) {
-            strs.push(message.slice(last, message.length));
-            break;
+        if (Globals.paramNotExist(postTween, "object")) {
+            throw new TypeError("postTween parameter is not of type object");
+        }
+
+        this.postTween = {};
+        this.postTween.props = postTween;
+        this.postTween.f = function (_this) {
+            for (var arg in _this.postTween.props) {
+                if (_this.postTween.props.hasOwnProperty(arg)) {
+                    _this.sprite[arg] = _this.postTween.props[arg];
+                }
+            }
+        };
+    }
+
+    for (var init in preTween) {
+        if (preTween.hasOwnProperty(init)) {
+            this.sprite[init] = preTween[init];
         }
     }
 
-    switch (this.loc) {
-
-        case "bottom_left":default:
-            vals.x = 10;
-            vals.y = this.y - strs.length * this.fontSize * 1.8;
-            break;
-
-        case "top_left":
-            vals.x = 10;
-            vals.y = strs.length * (this.fontSize * 1.8);
-            break;
-
-        case "top_right":
-            vals.x = this.game.width - 540;
-            vals.y = 10;
-            break;
-
-        case "bottom_right":
-            vals.x = this.game.width - 540;
-            vals.y = this.y - strs.length * this.fontSize * 1.8;
-            break;
+    if (!tP.hasOwnProperty("properties")) {
+        throw new ReferenceError("tweenParameters has no defined 'properties' property");
+    } else if (!tP.hasOwnProperty("easing")) {
+        throw new ReferenceError("tweenParameters has no defined 'easing' property");
+    } else if (!tP.hasOwnProperty("duration")) {
+        throw new ReferenceError("tweenParameters has no defined 'duration' property");
+    } else {
+        params[0] = tP.properties;
+        params[1] = tP.duration;
+        params[2] = tP.easing;
     }
 
-    vals.msg = strs.join(" ");
-    return vals;
+    this.intro = this.game.add.tween(this.sprite).to(...params, false, 0, 0, false);
+};
+
+Player.prototype.addOuttro = function (tweenParameters) {};
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Tracks the 3x3 vision radius of the Player, and changes tiles within that radius to visible. Is turned off
+ * if <code>Map.fog === false</code>.
+ *
+ * @this Player
+ */
+
+Player.prototype.visionRadius = function () {
+
+    var i,
+        j,
+        tile = {},
+        row = this.sprite.row,
+        col = this.sprite.col;
+
+    for (i = row - 1; i < row + 2; i++) {
+        for (j = col - 1; j < col + 2; j++) {
+            tile = this.map.tileMap[i][j];
+            tile.tint = 0xFFFFFF;
+            tile.discovered = true;
+        }
+    }
+};
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @deprecated
+ *
+ * @desc Makes the player sprite float (as if defying gravity).
+ *
+ * @private
+ *
+ * @this Player
+ */
+
+Player.prototype._float = function () {
+    this.sprite.isoZ = 5 + Math.sin(this.game.time.now * 0.005);
 };

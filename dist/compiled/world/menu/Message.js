@@ -1,5 +1,3 @@
-"use strict";
-
 (function () {})();
 /**
  * Created by apizzimenti on 7/15/16.
@@ -17,7 +15,7 @@
  *
  * @property game {object} Phaser game instance.
  * @property y {number} Height of the game.
- * @property message {string | string[]} Message to be displayed.
+ * @property messages {string[]} Message queue.
  * @property fontSize {number} Font size.
  * @property style {object} Message styling.
  * @property style.font {string} Font style.
@@ -30,22 +28,24 @@
  */
 
 function Message(game, size, loc) {
-    var _this = this;
 
     this.game = game;
     this.y = this.game.height;
-    this.message = "";
+    this.messages = [];
     this.loc = loc;
     this.fontSize = size;
+
     this.style = {
         font: size + "px Courier",
         fill: "#FFFFFF"
     };
 
+    // create Phaser signal dispatcher
     this.alert = new Phaser.Signal();
 
-    this.alert.add(function () {
-        _this._display();
+    // instantiate new events
+    this.alert.add(() => {
+        this._display();
     });
 }
 
@@ -60,36 +60,50 @@ function Message(game, size, loc) {
  */
 
 Message.prototype.add = function (message) {
-    this.message = message;
-    this.alert.dispatch();
+    this.messages.push(message);
+
+    if (this.messages.length <= 1) {
+        this.alert.dispatch();
+    }
 };
 
 /**
  * @author Anthony Pizzimenti
  *
- * @desc Displays the message on the screen for five seconds, with in and out tweens.
+ * @desc Displays the message at the front of the queue on the screen for five seconds, with in and out tweens.
  *
  * @private
  *
  * @this Message
- *
- * @todo get messages queue to work
  */
 
 Message.prototype._display = function () {
-    var _this2 = this;
 
-    var str = this._format(this.message);
+    // correctly format message
+    var str = this._format(this.messages[0]),
+        tween;
 
+    // add message text
     this.text = this.game.add.text(str.x, str.y, str.msg, this.style);
 
     this.text.alpha = 0;
     this.text.fixedToCamera = true;
 
+    // tween the text in
     this.game.add.tween(this.text).to({ alpha: 1 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
 
-    this.game.time.events.add(Phaser.Timer.SECOND * 5, function () {
-        _this2.game.add.tween(_this2.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+    this.game.time.events.add(Phaser.Timer.SECOND * 3, () => {
+
+        // tween the text out
+        tween = this.game.add.tween(this.text).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+
+        // when the above tween is completed, reset the queue and dispactch the next message
+        tween.onComplete.add(() => {
+            this.messages = this.messages.slice(1, this.messages.length);
+            if (this.messages.length !== 0) {
+                this.alert.dispatch();
+            }
+        });
     });
 };
 

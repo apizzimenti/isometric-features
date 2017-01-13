@@ -29,8 +29,7 @@ body {
   font-family: "Roboto Mono", "Courier", "monospace"; }
   .guide h1, .guide h2, .guide h3, .guide h4 {
     text-decoration: underline;
-    text-decoration-color: #6D6867;
-    margin: 5px 0px 10px 0px; }
+    text-decoration-color: #6D6867; }
   .guide a:link {
     color: #D33111;
     font-weight: bold; }
