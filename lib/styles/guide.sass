@@ -1,0 +1,61 @@
+// restricts height of game window to the height of the browser window; disables scrolling
+body
+  overflow: hidden
+
+// perpetual info button; see the Loader class in the test folder
+.guide-button
+  position: absolute
+  background: transparent
+  color: #FFF
+  border: none
+  font-family: "Courier", "monospace"
+  font-size: 20px
+  text-align: left
+
+  &:hover
+    cursor: pointer
+
+  &:active
+    outline: none
+
+  &:focus
+    outline: none
+
+// window is restricted to the middle of the screen
+.guide
+  z-index: 2
+  position: fixed
+  background: rgba(131, 131, 131, 0.6)
+  overflow-x: hidden
+  font-size: 16px
+  color: #FFFFFF
+  text-align: left
+  padding: 10px
+
+  font-family: "Courier", "monospace"
+
+  h1, h2, h3, h4
+    text-decoration: underline
+    text-decoration-color: #6D6867
+
+  a:link
+    color: #D33111
+    font-weight: bold
+
+  a:hover
+    text-decoration: underline
+    color: #D3614A
+
+  a:visited
+    color: #D33111
+    font-weight: bold
+
+  a:active
+    text-decoration: underline
+    color: #D3614A
+
+  code
+    background-color: #D33111
+    font-size: 14px
+    padding: 2px
+    font-family: "Courier", "monospace"
