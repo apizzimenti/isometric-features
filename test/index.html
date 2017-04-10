@@ -22,6 +22,11 @@
     <script src="../bower_components/array_functions/dist/funk.js"></script>
     <!-- endbower -->
 
+    <!--
+        by default, I load in the scripts from the lib folder. If you have downloaded the package, then including it
+        like /path/to/isometric-features/dist/isometric-features.js will suffice.
+    -->
+
     <!-- include: "type": "js", "files": ["<%= app.scripts %>"] -->
     <script src="../lib/physics/Bounds.js"></script>
     <script src="../lib/physics/Tiles.js"></script>
@@ -48,10 +53,12 @@
     <script src="../test/scripts/root.js"></script>
     <!-- /include -->
 
+    <!-- creates an instance of the game -->
     <div ng-app="game">
         <game></game>
     </div>
 
+    <!-- This is the text that goes into the guide menu. -->
     <div id="guide">
         <h3>isometric-features!</h3>
         This game toolkit is robust, with many available features and integrations. Make sure to check the
