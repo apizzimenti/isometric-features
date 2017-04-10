@@ -65,7 +65,7 @@ function Item(game, key, inventory, name) {
  */
 
 Item.prototype.action = function () {
-    console.warn(`${ this.key } is using the builtin action method`);
+    console.warn(`${this.key} is using the builtin action method`);
 };
 
 /**

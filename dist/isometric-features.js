@@ -1,6 +1,8 @@
-/*! isometric-features - v0.0.1 - 2016-12-20
-* Copyright (c) 2016 ; Licensed MIT */
-(function () {})();
+/*! isometric-features - v0.0.1 - 2017-04-10
+* Copyright (c) 2017 ; Licensed MIT */
+(function () {
+    "use strict";
+})();
 /**
  * Created by apizzimenti on 6/29/16.
  */
@@ -76,7 +78,9 @@ function dim(tileSize, mapSize, num) {
         return tileSize - mapSize;
     }
 }
-(function () {})();
+(function () {
+    "use strict";
+})();
 /**
  * Created by apizzimenti on 5/19/16.
  */
@@ -421,7 +425,7 @@ Debug.prototype.fps = function () {
 Debug.prototype.mousePos = function (mouse) {
 
     if (this.on) {
-        this.game.debug.text(`${ mouse.row }, ${ mouse.col }`, this.x, this.y + 20, this.color);
+        this.game.debug.text(`${mouse.row}, ${mouse.col}`, this.x, this.y + 20, this.color);
     }
 };
 
@@ -461,7 +465,7 @@ Debug.prototype.sprite = function (sprites) {
                 }
             } catch (e) {
                 // if they aren't loaded yet, send a warning to the console window
-                console.warn(`${ sprite.type } is not yet loaded`);
+                console.warn(`${sprite.type} is not yet loaded`);
             }
         };
 
@@ -515,7 +519,9 @@ Debug.prototype.tiles = function (tiles) {
 Debug.prototype._switch = function () {
     this.on = !this.on;
 };
-(function () {})();
+(function () {
+    "use strict";
+})();
 /**
  * Created by apizzimenti on 5/19/16.
  */
@@ -523,42 +529,63 @@ Debug.prototype._switch = function () {
 /**
  * @author Anthony Pizzimenti
  *
- * @desc A set of variables that have to be used in disparate locations.
- * 
- * @type {{anchor: number[], mapTileKey: string[], tween: object[], paramNotExist: function}}
+ * @desc A set of variables that have to be used in disparate locations. All methods are static.
  *
  * @property anchor {number[]} Globalized anchor for all sprites.
  * @property mapTileKey {string[]} Will contain keys for tile sprites.
  * @property tween {array} Default tween settings.
- * @property paramNotExist {function} Global testing method for parameters.
- * @property colorTween {function}
+ *
+ * @class Globals
  */
 
 var Globals = {
     anchor: [0.5, 0],
     mapTileKey: [],
-    tween: [1000, Phaser.Easing.Linear.None, true, 0, 0, false],
-
-    paramNotExist: function (param, type) {
-        return typeof param !== type || param == undefined;
-    },
-
-    colorTween: function (game, object, start, end, t) {
-
-        console.dir(object);
-
-        var blend = { step: 0 },
-            tween = game.add.tween(blend).to({ step: 100 }, t);
-
-        tween.onUpdateCallback(() => {
-            object.tint = Phaser.Color.interpolateColor(start, end, 100, Math.floor(blend.step), 1);
-        });
-
-        object.tint = start;
-        tween.start();
-    }
+    tween: [1000, Phaser.Easing.Linear.None, true, 0, 0, false]
 };
-(function () {})();
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Does this parameter exist?
+ *
+ * @param param {*} Function parameter to be tested.
+ * @param [type=null] Does this parameter match its intended type?
+ *
+ * @returns {boolean}
+ */
+
+Globals.paramNotExist = function (param, type) {
+    return typeof param !== type ? type : null || param == undefined;
+};
+
+/**
+ * @author Anthony Pizzimenti
+ *
+ * @desc Tweens the provided object's color from the start to end color.
+ *
+ * @param game {object} Current Phaser game instance.
+ * @param object {Animal | Item | Player | Tile} Object to have color tweened.
+ * @param start {string} Literal hex color representation.
+ * @param end {string} Literal hex color representation.
+ * @param t {number} Time to complete tween.
+ */
+
+Globals.colorTween = function (game, object, start, end, t) {
+
+    var blend = { step: 0 },
+        tween = game.add.tween(blend).to({ step: 100 }, t);
+
+    tween.onUpdateCallback(() => {
+        object.tint = Phaser.Color.interpolateColor(start, end, 100, Math.floor(blend.step), 1);
+    });
+
+    object.tint = start;
+    tween.start();
+};
+(function () {
+    "use strict";
+})();
 /**
  * Created by apizzimenti on 7/15/16.
  */
@@ -711,7 +738,9 @@ Mouse.prototype.reset = function () {
         }
     });
 };
-(function () {})();
+(function () {
+    "use strict";
+})();
 /**
  * Created by apizzimenti on 5/19/16.
  * This is automatically included in the isometric-features package to provide its users some ease-of-use.
@@ -853,7 +882,7 @@ System.prototype.preload = function () {
         var host = window.location.origin + "/",
             docs = "https://apizzimenti.github.io/isometric-features-docs/";
 
-        console.log("%c documentation " + `%c ${ docs }`, "background: #0095dd; color: #FFF", "color: #5D5D5D");
+        console.log("%c documentation " + `%c ${docs}`, "background: #0095dd; color: #FFF", "color: #5D5D5D");
     });
 };
 
@@ -1293,7 +1322,7 @@ function Item(game, key, inventory, name) {
  */
 
 Item.prototype.action = function () {
-    console.warn(`${ this.key } is using the builtin action method`);
+    console.warn(`${this.key} is using the builtin action method`);
 };
 
 /**
@@ -1476,7 +1505,9 @@ Map.prototype._generateMapKeys = function () {
         Globals.mapTileKey.push(frame.name);
     }
 };
-(function () {})();
+(function () {
+    "use strict";
+})();
 /**
  * Created by apizzimenti on 7/15/16.
  */
@@ -1532,7 +1563,9 @@ ContextMenu.prototype.createContextMenu = function (actions) {
         this.menu.destroy();
     });
 };
-(function () {})();
+(function () {
+    "use strict";
+})();
 /**
  * Created by apizzimenti on 7/21/16.
  */
@@ -1626,7 +1659,7 @@ function Guide(element, gameElement, buttonOptions, menuStyles) {
 
     $(document).ready(() => {
         // jquery object reference to find the specific guide element
-        _this.guideElement = $(`#${ element }`);
+        _this.guideElement = $(`#${element}`);
 
         // on ready, configure the window and instantiate the button
         _this._configureWindow();
@@ -1658,7 +1691,7 @@ Guide.prototype._button = function () {
 
 
     // template now points to the jquery object reference
-    template = `#${ id }`,
+    template = `#${id}`,
         _this = this;
 
     button.id = id;
@@ -1710,12 +1743,12 @@ Guide.prototype._button = function () {
 
         if (!_this.raw.guideButton.on) {
             _this.raw.guideButton.on = true;
-            $(`#${ _this.raw.guideId }`).css({
+            $(`#${_this.raw.guideId}`).css({
                 "display": "block"
             });
         } else {
             _this.raw.guideButton.on = false;
-            $(`#${ _this.raw.guideId }`).css({
+            $(`#${_this.raw.guideId}`).css({
                 "display": "none"
             });
         }
@@ -1735,11 +1768,11 @@ Guide.prototype._button = function () {
 Guide.prototype._configureWindow = function () {
 
     // grab the jquery reference to the guide element itself
-    var template = `#${ this.raw.guideId }`,
+    var template = `#${this.raw.guideId}`,
 
 
     // get the offsets of the game canvas so we can position the guide window accordingly
-    offset = $(`#${ this.raw.canvasId }`).offset(),
+    offset = $(`#${this.raw.canvasId}`).offset(),
         canvas = this.raw.canvas,
 
 
@@ -1789,11 +1822,13 @@ Guide.prototype._configureWindow = function () {
  * @property escape {object} Phaser escape key.
  * @property messages {Message} Message object.
  * @property times {number} Number of times tooltips have been viewed.
+ * @property graphics {object} Phaser graphics object.
+ *
  * @property menuGroup {object} Menu sprite group.
  * @property itemGroup {object} Isometric sprite group.
  *
- * @property itemList {sList} Singly linked list of the items in the inventory.
- * @property itemCache {
+ * @property itemList {sList} Linked list of the items in the inventory.
+ * @property itemCache {object} Caches all items so they can be quickly referenced when reset.
  *
  * @property area {object} Total space allocated to Inventory module.
  * @property area.width {number} Width of Inventory module space.
@@ -1870,7 +1905,7 @@ function Inventory(game, map, mouse, escape, itemGroup, messagePos) {
 
     window.graphics = graphics;
 
-    // create new message dispatcher
+    // create new message dispatcher and context menu
     this.messages = new Message(this.game, 14, messagePos);
     this.contextMenu = new ContextMenu(this);
 
@@ -2118,7 +2153,7 @@ Inventory.prototype._placeItem = function () {
         item = this.currentItem,
         key = item.key,
         tile = this.mouse.tile,
-        message = `Sorry, you can't place the ${ key } there. Choose a place that you've already seen!`;
+        message = `Sorry, you can't place the ${key} there. Choose a place that you've already seen!`;
 
     // if the selected tile is discovered and the mouse is in bounds
     if (tile.discovered && isInBounds(this.mouse)) {
@@ -2149,7 +2184,9 @@ Inventory.prototype._placeItem = function () {
         this.messages.add(message);
     }
 };
-(function () {})();
+(function () {
+    "use strict";
+})();
 /**
  * Created by apizzimenti on 7/15/16.
  */
@@ -2484,16 +2521,17 @@ Player.prototype._instantiate = function () {
 Player.prototype.addIntro = function (preTween, tweenParameters, postTween) {
 
     var params = [],
-        tP = tweenParameters;
+        tP = tweenParameters,
+        e;
 
     if (Globals.paramNotExist(preTween, "object")) {
-        throw new TypeError("preTween is not of type object");
+        throw new Error("preTween is not of type object");
     } else if (Globals.paramNotExist(tP, "object")) {
-        throw new TypeError("tweenParameters is not of type object");
+        throw new Error("tweenParameters is not of type object");
     } else if (postTween) {
 
         if (Globals.paramNotExist(postTween, "object")) {
-            throw new TypeError("postTween parameter is not of type object");
+            throw new Error("postTween parameter is not of type object");
         }
 
         this.postTween = {};
@@ -2514,11 +2552,11 @@ Player.prototype.addIntro = function (preTween, tweenParameters, postTween) {
     }
 
     if (!tP.hasOwnProperty("properties")) {
-        throw new ReferenceError("tweenParameters has no defined 'properties' property");
+        throw new Error("tweenParameters.properties is not defined");
     } else if (!tP.hasOwnProperty("easing")) {
-        throw new ReferenceError("tweenParameters has no defined 'easing' property");
+        throw new Error("tweenParameters.easing is not defined");
     } else if (!tP.hasOwnProperty("duration")) {
-        throw new ReferenceError("tweenParameters has no defined 'duration' property");
+        throw new Error("tweenParameters.duration is not defined");
     } else {
         params[0] = tP.properties;
         params[1] = tP.duration;

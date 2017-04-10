@@ -1,4 +1,6 @@
-(function () {})();
+(function () {
+    "use strict";
+})();
 /**
  * Created by apizzimenti on 7/21/16.
  */
@@ -92,7 +94,7 @@ function Guide(element, gameElement, buttonOptions, menuStyles) {
 
     $(document).ready(() => {
         // jquery object reference to find the specific guide element
-        _this.guideElement = $(`#${ element }`);
+        _this.guideElement = $(`#${element}`);
 
         // on ready, configure the window and instantiate the button
         _this._configureWindow();
@@ -124,7 +126,7 @@ Guide.prototype._button = function () {
 
 
     // template now points to the jquery object reference
-    template = `#${ id }`,
+    template = `#${id}`,
         _this = this;
 
     button.id = id;
@@ -176,12 +178,12 @@ Guide.prototype._button = function () {
 
         if (!_this.raw.guideButton.on) {
             _this.raw.guideButton.on = true;
-            $(`#${ _this.raw.guideId }`).css({
+            $(`#${_this.raw.guideId}`).css({
                 "display": "block"
             });
         } else {
             _this.raw.guideButton.on = false;
-            $(`#${ _this.raw.guideId }`).css({
+            $(`#${_this.raw.guideId}`).css({
                 "display": "none"
             });
         }
@@ -201,11 +203,11 @@ Guide.prototype._button = function () {
 Guide.prototype._configureWindow = function () {
 
     // grab the jquery reference to the guide element itself
-    var template = `#${ this.raw.guideId }`,
+    var template = `#${this.raw.guideId}`,
 
 
     // get the offsets of the game canvas so we can position the guide window accordingly
-    offset = $(`#${ this.raw.canvasId }`).offset(),
+    offset = $(`#${this.raw.canvasId}`).offset(),
         canvas = this.raw.canvas,
 
 

@@ -97,7 +97,7 @@ Debug.prototype.fps = function () {
 Debug.prototype.mousePos = function (mouse) {
 
     if (this.on) {
-        this.game.debug.text(`${ mouse.row }, ${ mouse.col }`, this.x, this.y + 20, this.color);
+        this.game.debug.text(`${mouse.row}, ${mouse.col}`, this.x, this.y + 20, this.color);
     }
 };
 
@@ -137,7 +137,7 @@ Debug.prototype.sprite = function (sprites) {
                 }
             } catch (e) {
                 // if they aren't loaded yet, send a warning to the console window
-                console.warn(`${ sprite.type } is not yet loaded`);
+                console.warn(`${sprite.type} is not yet loaded`);
             }
         };
 

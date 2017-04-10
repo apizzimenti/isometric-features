@@ -1,4 +1,6 @@
-(function () {})();
+(function () {
+    "use strict";
+})();
 /**
  * Created by apizzimenti on 5/19/16.
  * This is automatically included in the isometric-features package to provide its users some ease-of-use.
@@ -140,7 +142,7 @@ System.prototype.preload = function () {
         var host = window.location.origin + "/",
             docs = "https://apizzimenti.github.io/isometric-features-docs/";
 
-        console.log("%c documentation " + `%c ${ docs }`, "background: #0095dd; color: #FFF", "color: #5D5D5D");
+        console.log("%c documentation " + `%c ${docs}`, "background: #0095dd; color: #FFF", "color: #5D5D5D");
     });
 };
 

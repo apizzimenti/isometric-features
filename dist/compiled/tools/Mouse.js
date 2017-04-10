@@ -1,4 +1,6 @@
-(function () {})();
+(function () {
+    "use strict";
+})();
 /**
  * Created by apizzimenti on 7/15/16.
  */
