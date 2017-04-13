@@ -1,15 +1,19 @@
+# ignore library folders so we don't upload everything at the same time
 bower_components
 node_modules
 
+# this folder sometimes gets added
 .tmp/
 
+# don't upload project preferences, it's really annoying
 .idea/*
 
+# you can store your bower files wherever you want, I just configured mine this way
 .bowerrc
 *.DS_Store
 
-.yo-rc.json
-
+# npm debug logs
 *.log
 
+# map files can be ignored, but include both the css and the sass files
 **/*.css.map

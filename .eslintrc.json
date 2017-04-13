@@ -99,6 +99,9 @@
         ],
         "spaced-comment": [
             "error"
+        ],
+        "no-unused-vars": [
+            "warn"
         ]
     }
 }
