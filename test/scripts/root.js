@@ -36,7 +36,7 @@ var isogame = function (scope, injector) {
         escape,
         that = this,
 
-        // initialize the
+        // initialize a new System object to control the game and Angular scope
         system = new System(game, scope);
     
     var boot = {
